@@ -16,7 +16,16 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from src import data_io
 from src.fft_analysis import fft_magnitude
+from src.forward_models import normalize_m
 from src.height import confidence_metrics, height_parabolic, platform_metrics_from_masks, summarize_height
+from src.metrics_v1 import (
+    grid_mask_from_a,
+    method_metrics as method_metrics_v1,
+    modulation_residual as modulation_residual_v1,
+    project_a_nonnegative,
+    project_a_signed,
+    stripe_mask_from_raw,
+)
 from src.os_sim import demodulate_multigroup, fuse_hv
 from src.visualization import save_montage, save_scalar_image
 
@@ -92,12 +101,17 @@ def main() -> None:
         calibration_mat=args.calibration_mat,
     )
     M = M.astype(np.float32)
+    M_eval = normalize_m(M)
     actual_source = pattern_infos[0].get("source", args.pattern_source) if pattern_infos else args.pattern_source
-    A_ls = ls_projection(Y, M)
+    A_signed = project_a_signed(Y, M_eval)
+    A_nonnegative = project_a_nonnegative(Y, M_eval)
+    A_ls = A_nonnegative
     A_cls_fused = fuse_hv(A_cls[:, 0], A_cls[:, 1] if A_cls.shape[1] > 1 else A_cls[:, 0])
     A_ls_fused = fuse_hv(A_ls[:, 0], A_ls[:, 1] if A_ls.shape[1] > 1 else A_ls[:, 0])
+    A_signed_fused = fuse_hv(A_signed[:, 0], A_signed[:, 1] if A_signed.shape[1] > 1 else A_signed[:, 0])
     height_cls = height_parabolic(A_cls_fused, z_values)
     height_ls = height_parabolic(A_ls_fused, z_values)
+    height_signed = height_parabolic(A_signed_fused, z_values)
     grid_masks, grid_peaks = build_grid_masks(A_cls)
     low_mask = optional_mask(args.platform_low_mask)
     high_mask = optional_mask(args.platform_high_mask)
@@ -109,21 +123,72 @@ def main() -> None:
     np.save(out_dir / "A_v_ls_stack.npy", A_ls[:, 1] if A_ls.shape[1] > 1 else A_ls[:, 0])
     np.save(out_dir / "A_fused_ls_stack.npy", A_ls_fused)
     np.save(out_dir / "A_fused_cls_stack.npy", A_cls_fused)
+    np.save(out_dir / "A_fused_signed_stack.npy", A_signed_fused)
     np.save(out_dir / "height_ls_peakfit.npy", height_ls)
     np.save(out_dir / "height_cls_peakfit.npy", height_cls)
+    np.save(out_dir / "height_signed_peakfit.npy", height_signed)
+    np.save(out_dir / "negative_fraction_map.npy", np.mean(A_signed < 0.0, axis=(0, 1)).astype(np.float32))
 
     y_tilde = Y - Y.mean(axis=2, keepdims=True)
-    residual_cls = y_tilde - A_cls[:, :, None, :, :] * M[None, :, :, :, :]
-    residual_ls = y_tilde - A_ls[:, :, None, :, :] * M[None, :, :, :, :]
+    residual_cls = y_tilde - A_cls[:, :, None, :, :] * M_eval[None, :, :, :, :]
+    residual_ls = y_tilde - A_ls[:, :, None, :, :] * M_eval[None, :, :, :, :]
+    residual_signed = y_tilde - A_signed[:, :, None, :, :] * M_eval[None, :, :, :, :]
     mid = Y.shape[0] // 2
     save_montage([A_cls_fused[mid], A_ls_fused[mid], A_ls_fused[mid] - A_cls_fused[mid]], out_dir / "A_cls_vs_A_ls.png", ["A_cls", "A_ls", "A_ls - A_cls"], cols=3, cmap="viridis")
     save_montage([height_cls, height_ls, height_ls - height_cls], out_dir / "height_cls_vs_ls.png", ["height cls", "height ls", "delta"], cols=3, cmap="viridis")
-    save_montage([fft_magnitude(residual_cls[mid, 0, 0]), fft_magnitude(residual_ls[mid, 0, 0]), fft_magnitude(residual_cls[mid, -1, 0]), fft_magnitude(residual_ls[mid, -1, 0])], out_dir / "residual_fft.png", ["cls H FFT", "ls H FFT", "cls V FFT", "ls V FFT"], cols=2, cmap="magma")
+    save_montage(
+        [A_cls_fused[mid], A_signed_fused[mid], A_ls_fused[mid], A_ls_fused[mid] - A_cls_fused[mid]],
+        out_dir / "A_compare.png",
+        ["A_cls", "A_ls_signed", "A_ls_nonnegative", "nonnegative - cls"],
+        cols=2,
+        cmap="viridis",
+    )
+    save_montage(
+        [height_cls, height_signed, height_ls, height_ls - height_cls],
+        out_dir / "height_compare.png",
+        ["height cls", "height signed", "height nonnegative", "nonnegative - cls"],
+        cols=2,
+        cmap="viridis",
+    )
+    save_montage(
+        [
+            fft_magnitude(residual_cls[mid, 0, 0]),
+            fft_magnitude(residual_signed[mid, 0, 0]),
+            fft_magnitude(residual_ls[mid, 0, 0]),
+            fft_magnitude(residual_ls[mid, -1, 0]),
+        ],
+        out_dir / "residual_fft.png",
+        ["cls H FFT", "signed H FFT", "nonnegative H FFT", "nonnegative V FFT"],
+        cols=2,
+        cmap="magma",
+    )
+    save_scalar_image(np.mean(A_signed < 0.0, axis=(0, 1)).astype(np.float32), out_dir / "negative_fraction_map.png", "Signed LS negative fraction", cmap="magma")
     save_scalar_image(height_ls, out_dir / "height_ls_map.png", "LS-projection height")
 
+    grid_masks_v1 = []
+    stripe_masks_v1 = []
+    for g in range(A_cls.shape[1]):
+        grid_masks_v1.append(grid_mask_from_a(A_cls[:, g])[0])
+        stripe_masks_v1.append(stripe_mask_from_raw(Y[:, g])[0])
+    grid_masks_v1_arr = np.stack(grid_masks_v1, axis=0)
+    stripe_masks_v1_arr = np.stack(stripe_masks_v1, axis=0)
+    v1_variants = [
+        ("A_cls", A_cls),
+        ("A_ls_signed", A_signed),
+        ("A_ls_nonnegative", A_nonnegative),
+        ("A_ls_cos_sin", A_cls),
+        ("A_ls_measured_template", A_nonnegative),
+    ]
+    v1_rows = []
+    for name, A_variant in v1_variants:
+        row = method_metrics_v1(name, Y, A_variant, M_eval, z_values, grid_masks_v1_arr, stripe_masks_v1_arr)
+        if name == "A_ls_signed":
+            row["negative_fraction"] = float(np.mean(A_signed < 0.0))
+        v1_rows.append(row)
+
     rows = [
-        method_metrics("A_cls", A_cls, Y, M, z_values, grid_masks, low_mask, high_mask),
-        method_metrics("A_ls_fixed_Mtheta", A_ls, Y, M, z_values, grid_masks, low_mask, high_mask),
+        method_metrics("A_cls", A_cls, Y, M_eval, z_values, grid_masks, low_mask, high_mask),
+        method_metrics("A_ls_fixed_Mtheta", A_ls, Y, M_eval, z_values, grid_masks, low_mask, high_mask),
     ]
     metrics = {
         "sample": args.sample,
@@ -134,6 +199,11 @@ def main() -> None:
         "pattern_infos": pattern_infos,
         "grid_peaks": grid_peaks,
         "methods": rows,
+        "v1_full_methods": v1_rows,
+        "negative_fraction": {
+            "global": float(np.mean(A_signed < 0.0)),
+            "by_group": [float(np.mean(A_signed[:, g] < 0.0)) for g in range(A_signed.shape[1])],
+        },
         "interpretation": "A_ls is a closed-form fixed-M_theta baseline. If it matches or beats network outputs, the network is not yet necessary for the core inverse step.",
     }
     data_io.write_json(out_dir / "metrics.json", metrics)
@@ -155,9 +225,23 @@ def main() -> None:
         )
     report += [
         "",
+        "## v1 Full LS Variants",
+        "",
+        "| method | modulation loss | A grid | residual grid | stripe leakage | fused grid | height std |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for row in v1_rows:
+        report.append(
+            f"| {row['method']} | {row['modulation_loss']:.6g} | {row['A_grid_energy_mean']:.6g} | {row['residual_grid_energy_mean']:.6g} | {row['residual_stripe_leakage_mean']:.6g} | {row['A_fused_grid_energy']:.6g} | {row['height_fused']['height_std']:.6g} |"
+        )
+    report += [
+        "",
+        f"Signed LS negative fraction: `{metrics['negative_fraction']['global']:.6g}`. A high value means the measured template is phase/sign-mismatched for many pixels and nonnegative clipping is physically important.",
+        "",
         "A_cls remains a diagnostic baseline, not ground truth. A_ls tests how far a fixed measured/calibrated pattern can go without a network.",
     ]
     (out_dir / "report.md").write_text("\n".join(report), encoding="utf-8")
+    (out_dir / "ls_full_report.md").write_text("\n".join(report), encoding="utf-8")
     data_io.append_report(
         ROOT / "outputs/nightly_report.md",
         "P5 v1 Fixed-M_theta LS Projection",
