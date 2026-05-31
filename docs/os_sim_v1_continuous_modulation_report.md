@@ -26,6 +26,50 @@
 - 现有 network 的高度 std 较低，但 A 的 TV 极小，存在过平滑/平台化风险，不能作为主科学结论。
 - 没有独立标准高度或标准台阶真值，因此本报告不声明绝对计量精度提升。
 
+### 1.1 先看这里：这些结果分别是什么
+
+本报告里最容易混淆的是：有些是“原始数据”，有些是“从原始数据算出来的传统 baseline”，有些是“新方法或对照方法”。先按来源分清楚：
+
+| 名称 | 是什么 | 怎么得到 | 在本报告里的角色 |
+|---|---|---|---|
+| `raw Y_real` | 相机真实拍到的条纹图 | 样本 `细台阶`，每个 z 层读取 H/V 相移帧，T6 主线是 frames `100-105` | 最原始数据，不是最终高度图 |
+| `A_cls` | 传统 OS-SIM 解调光切片图 | 对 raw 三步相移做经典公式解调，再 H/V RMS 融合 | 原始 baseline / 传统方法参考 |
+| `height from A_cls` | 传统 baseline 高度图 | 沿 `A_cls` 的 z-stack 寻峰 | 最重要的“原始参考高度”，不是 ground truth |
+| `T6/T12 comparison` | 不同条纹周期/相移数的 baseline 对比 | 分别对 T6 3-step、T12 3-step、T12 6-step 解调并比较峰宽、尖锐度、残余网格 | 判断哪组采集模式更适合后续主线 |
+| `forward model` | 用 `D0 + A*M_theta` 重投影 raw 的能力测试 | 固定 `A_cls` 和不同 `M_theta`，看能否重建调制域 raw | 判断条纹模板/标定是否解释真实数据 |
+| `A_ls` | 固定 `M_theta` 的闭式最小二乘 A | 用 raw 去均值调制项和 measured-calibrated `M_theta` 直接算出 | 关键新 baseline：不用网络 |
+| `latent_no_platform` | 不使用 platform loss 的 A 优化 | 从 `A_cls` 初始化，只用调制域/平滑/grid 等约束优化 A | 检查不用“平台变平”是否仍有改善 |
+| `existing_network` | 之前 v0 网络输出 | 已有神经网络输出 A，再读出高度 | 只能做对照，不能作为本轮主结论 |
+
+### 1.2 指标怎么判断好坏
+
+不同指标回答的问题不同，不能只看一个数字。
+
+| 指标 | 越大/越小 | 回答的问题 | 注意事项 |
+|---|---|---|---|
+| `modulation loss` | 越小越好 | `A*M_theta` 能不能解释 raw 去均值后的调制图 | 这是本轮物理建模最核心指标 |
+| `grid energy` | 越小越好 | A 图里还剩多少网格/Moiré 频率残留 | 只说明残余网格少，不等于高度绝对更准 |
+| `peak sharpness` | 越大越好 | z 方向峰是否更尖锐 | 用来比较 T6/T12 和 ROI 响应 |
+| `FWHM` | 越小通常越好 | 轴向响应峰宽有多宽 | 太宽说明光切片差；但真实连续响应不应期望为 0 |
+| `height std` | 不能简单越小越好 | 高度图整体起伏/稳定性 | 没有真值时，过小可能只是被平滑了 |
+| `A TV` | 不是越小越好 | A 图有多平滑 | 极小值常提示过平滑，尤其是 network |
+| `invalid fraction` | 越小越好 | 低置信/无效区域比例 | 本轮主要方法都是 `0.0`，区分度不大 |
+
+### 1.3 哪个结果最好，哪个只是参考
+
+简短判断如下：
+
+| 问题 | 当前最好的结果 | 为什么 | 不能过度解释为 |
+|---|---|---|---|
+| 哪个采集组更适合主线？ | `T6 3-step` | FWHM `8.4516`，明显窄于 T12；peak sharpness `0.03123`，高于 T12 | 不能说 T6 在所有样本/所有系统都绝对最好 |
+| 哪个最能解释 raw 调制域？ | `A_ls_fixed_Mtheta` | modulation loss `0.03354`，显著低于 `A_cls` 的 `0.06152` | 不能说高度一定更准 |
+| 哪个 residual grid 更少？ | `A_ls_fixed_Mtheta` 和 `latent_no_platform` 接近 | grid energy 约 `0.837/0.839`，低于 `A_cls` 的 `0.889` | 不能说 Moiré 已完全消除 |
+| 哪个高度 std 最小？ | `existing_network` | height std `2.84224`，低于 `A_cls` 的 `2.93635` | 不能当作主结论，因为 A TV 只有 `0.00047`，过平滑风险很高 |
+| 哪个是最可靠的原始参考？ | `A_cls / height from A_cls` | 传统公式直接从 raw 得到，假设最少 | 不是 clean ground truth，也不是绝对高度真值 |
+| 哪个应该作为下一阶段 baseline？ | `A_ls_fixed_Mtheta` | 不用网络、不用 platform loss，却显著降低 modulation loss | 仍需残差 FFT、ROI、标准件/重复性验证 |
+
+一句话总结：本轮真正有价值的结果不是“网络高度图更平”，而是发现 **固定 measured-calibrated `M_theta` 的 LS projection 已经能显著改善 raw 调制域解释**。因此下一步主线应该先完善 `M_theta` 和 LS/latent baseline，再判断网络是否必要。
+
 ## 2. 理论推导
 
 ### 2.1 传统三步 OS-SIM 解调
@@ -175,33 +219,61 @@ $$
 
 ### 4.1 ROI 与轴向响应曲线
 
+这组图回答：不同位置的 $A(z)$ 是不是连续响应，以及哪些 ROI 更可靠。
+
 ![ROI locations](assets/os_sim_v1/roi_locations.png)
+
+上图是 ROI 位置。它不是结果好坏图，只告诉读者下面曲线来自哪里。
 
 ![Axial curves](assets/os_sim_v1/axial_curves.png)
 
+上图是每个 ROI 的 $A(z)$ 曲线。峰的位置对应高度读出位置；峰宽对应轴向响应宽度。理想二分模型会期待非常窄的响应，但真实数据出现有限宽度峰，因此支持连续调制度响应解释。
+
 ### 4.2 T6/T12 响应与频域对比
 
+这组图回答：T6、T12 哪个采集组更适合主线，以及 A 图中是否还有残余网格/Moiré。
+
 ![Axial T6/T12 comparison](assets/os_sim_v1/axial_t6_t12_response_compare.png)
+
+上图比较 T6/T12 的 FWHM、峰尖锐度和 residual grid。当前综合判断 `T6 3-step` 最好。
 
 ![Frequency T6/T12 comparison](assets/os_sim_v1/frequency_t6_vs_t12_compare.png)
 
 ![Grid energy over z](assets/os_sim_v1/grid_energy_over_z.png)
 
+上图显示 residual grid energy 随 z 的变化。这个值越低，说明 A 图中的固定频率网格残留越少。
+
 ![Section FFT examples](assets/os_sim_v1/section_fft_examples.png)
+
+上图是 A section 的频谱示例。亮点不是样品本身的高度，而是频域中仍然存在的周期性残差。
 
 ### 4.3 Forward、LS、latent/filter 对照
 
+这组图回答：`M_theta` 能不能重投影 raw，LS projection 做了什么，以及网络/滤波/latent 谁像是在“解释数据”，谁像是在“平滑图像”。
+
 ![Forward reprojection examples](assets/os_sim_v1/forward_reprojection_examples.png)
+
+上图比较真实 raw phase frame 和用 `D0 + A*M_theta` 重投影出来的 frame。越像，说明 `M_theta` 和 A 越能解释 raw 调制域。
 
 ![Forward residual examples](assets/os_sim_v1/forward_residual_examples.png)
 
+上图是重投影残差。残差中仍有结构性条纹，说明 forward model 还没完全解释真实系统。
+
 ![A cls vs A ls](assets/os_sim_v1/ls_A_cls_vs_A_ls.png)
+
+上图比较传统 `A_cls` 和固定 `M_theta` 后闭式估计出的 `A_ls`。`A_ls` 不是网络结果，是直接由 raw modulation 和 `M_theta` 算出来的结果。
 
 ![Height cls vs ls](assets/os_sim_v1/ls_height_cls_vs_ls.png)
 
+上图比较 `A_cls` 和 `A_ls` 沿 z 寻峰得到的高度。这里 `A_ls` 的调制域解释更好，但 height std 更大，所以不能直接说高度更准。
+
 ![Latent and filter comparison](assets/os_sim_v1/latent_simple_filter_comparison.png)
 
+上图把 `A_cls`、简单滤波和无 platform loss 的 latent 优化放在一起。简单滤波让图更平滑，但没有真正降低 grid energy；latent/LS 更接近物理调制域解释。
+
 ![Metrology height maps](assets/os_sim_v1/metrology_height_maps.png)
+
+上图是不同方法读出的高度图对照。由于没有标准件真值，只能看方法间差异，不能把其中某一张当绝对正确高度。
 
 ## 5. 结果对比
 
