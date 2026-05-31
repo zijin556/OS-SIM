@@ -1,0 +1,791 @@
+{
+  "overall": "satisfied",
+  "status_counts": {
+    "satisfied": 29
+  },
+  "contracts": [
+    {
+      "id": "data_inspection",
+      "description": "Raw data manifest, format inventory, dimension inference, frame stats, and previews.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/config.json",
+        "outputs/data_manifest.json",
+        "outputs/data_report.md",
+        "outputs/data_frame_stats.json",
+        "outputs/data_format_inventory.json",
+        "outputs/data_dimension_inference.json",
+        "outputs/previews/raw_frames.png",
+        "outputs/previews/phase_frames_montage.png",
+        "outputs/previews/z_scan_montage.png"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/config.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "calibration_assets",
+      "description": "Measured DMD bitmap and DMD-CCD map inventory.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/calibration/config.json",
+        "outputs/calibration/assets_inventory.json",
+        "outputs/calibration/calibration_report.md",
+        "outputs/calibration/ossim_t6_h_3step_mapped_patterns.npy",
+        "outputs/calibration/ossim_t6_v_3step_mapped_patterns.npy"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/calibration/config.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "z_unit_evidence",
+      "description": "Local z-unit evidence and report.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/z_unit/config.json",
+        "outputs/z_unit/evidence.json",
+        "outputs/z_unit/z_unit_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/z_unit/config.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "height_truth_assets",
+      "description": "Local search for independent height-truth assets and derived pseudo-references.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/height_truth_assets/config.json",
+        "outputs/height_truth_assets/assets.json",
+        "outputs/height_truth_assets/height_truth_assets_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/height_truth_assets/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/height_truth_assets/assets.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "cli_surface",
+      "description": "Command-line help, output-scope, raw-root policy, and graceful dependency-degradation audit.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/cli_surface/config.json",
+        "outputs/cli_surface/cli_surface.json",
+        "outputs/cli_surface/cli_surface_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/cli_surface/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/cli_surface/cli_surface.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "baseline_t6_hv",
+      "description": "Traditional H/V/fused OS-SIM baseline.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/baseline/t6_hv/config.json",
+        "outputs/baseline/t6_hv/metrics.json",
+        "outputs/baseline/t6_hv/A_fused_stack.npy",
+        "outputs/baseline/t6_hv/height_map.png"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/baseline/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/baseline/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "frequency_t6_hv",
+      "description": "T6 H/V FFT residual analysis.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/frequency/t6_hv/config.json",
+        "outputs/frequency/t6_hv/metrics.json",
+        "outputs/frequency/t6_hv/frequency_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/frequency/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/frequency/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "frequency_group_compare",
+      "description": "T6/T12 group comparison.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/frequency/group_compare/config.json",
+        "outputs/frequency/group_compare/t6_vs_t12_compare.json",
+        "outputs/frequency/group_compare/frequency_compare_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/frequency/group_compare/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/frequency/group_compare/t6_vs_t12_compare.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "forward_t6_hv",
+      "description": "Forward model crop comparison.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/forward/t6_hv/config.json",
+        "outputs/forward/t6_hv/model_compare.json",
+        "outputs/forward/t6_hv/forward_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/forward/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/forward/t6_hv/model_compare.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "latent_opt_generated",
+      "description": "Generated-pattern A-latent optimization.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/latent_opt/t6_hv/config.json",
+        "outputs/latent_opt/t6_hv/metrics.json",
+        "outputs/latent_opt/t6_hv/A_fused_stack.npy"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/latent_opt/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/latent_opt/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "latent_opt_measured",
+      "description": "Measured-calibrated A-latent optimization.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/latent_opt/t6_hv_measured/config.json",
+        "outputs/latent_opt/t6_hv_measured/metrics.json",
+        "outputs/latent_opt/t6_hv_measured/A_fused_stack.npy"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/latent_opt/t6_hv_measured/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/latent_opt/t6_hv_measured/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "theta_opt",
+      "description": "Low-dimensional q/phase/harmonic theta optimization.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/theta_opt/t6_hv/config.json",
+        "outputs/theta_opt/t6_hv/metrics.json",
+        "outputs/theta_opt/t6_hv/A_fused_stack.npy"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/theta_opt/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/theta_opt/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "affine_warp_opt",
+      "description": "Generated-DMD affine warp theta optimization.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/affine_warp_opt/t6_hv/config.json",
+        "outputs/affine_warp_opt/t6_hv/metrics.json",
+        "outputs/affine_warp_opt/t6_hv/A_fused_stack.npy"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/affine_warp_opt/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/affine_warp_opt/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "platform_opt_generated",
+      "description": "Generated-pattern platform-gated A optimization.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/platform_opt/t6_hv/config.json",
+        "outputs/platform_opt/t6_hv/metrics.json",
+        "outputs/platform_opt/t6_hv/A_fused_best_stack.npy"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/platform_opt/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/platform_opt/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "platform_opt_measured",
+      "description": "Measured-calibrated platform-gated A optimization.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/platform_opt/t6_hv_measured/config.json",
+        "outputs/platform_opt/t6_hv_measured/metrics.json",
+        "outputs/platform_opt/t6_hv_measured/A_fused_best_stack.npy"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/platform_opt/t6_hv_measured/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/platform_opt/t6_hv_measured/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "height_baseline",
+      "description": "Baseline height reconstruction.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/height/baseline_t6_hv/config.json",
+        "outputs/height/baseline_t6_hv/metrics.json",
+        "outputs/height/baseline_t6_hv/height_maps.png",
+        "outputs/height/baseline_t6_hv/platform_metrics.json"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/height/baseline_t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/height/baseline_t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "height_platform_measured",
+      "description": "Measured-calibrated platform-gated height reconstruction.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/height/platform_opt_t6_hv_measured/config.json",
+        "outputs/height/platform_opt_t6_hv_measured/metrics.json",
+        "outputs/height/platform_opt_t6_hv_measured/height_maps.png",
+        "outputs/height/platform_opt_t6_hv_measured/platform_metrics.json"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/height/platform_opt_t6_hv_measured/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/height/platform_opt_t6_hv_measured/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "complete_samples",
+      "description": "Complete non-excluded sample comparison.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/complete_samples/t6_hv_measured/config.json",
+        "outputs/complete_samples/t6_hv_measured/metrics.json",
+        "outputs/complete_samples/t6_hv_measured/complete_samples_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/complete_samples/t6_hv_measured/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/complete_samples/t6_hv_measured/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "latent_sweep",
+      "description": "A-latent hyperparameter sweep.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/latent_sweep/t6_hv/config.json",
+        "outputs/latent_sweep/t6_hv/sweep_metrics.json",
+        "outputs/latent_sweep/t6_hv/sweep_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/latent_sweep/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/latent_sweep/t6_hv/sweep_metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "simulation",
+      "description": "Synthetic ideal/realistic sanity check.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/sim/config.json",
+        "outputs/sim/sim_metrics.json",
+        "outputs/sim/sim_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/sim/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/sim/sim_metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "tiny_net",
+      "description": "Optional tiny-net stage or graceful missing-torch report.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/tiny_net/config.json",
+        "outputs/tiny_net/metrics.json",
+        "outputs/tiny_net/report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/tiny_net/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/tiny_net/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "inverse_net_training",
+      "description": "Neural inverse light-section network training or graceful missing-torch report.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/inverse_net/t6_hv/config.json",
+        "outputs/inverse_net/t6_hv/metrics.json",
+        "outputs/inverse_net/t6_hv/inverse_net_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/inverse_net/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/inverse_net/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "inverse_net_evaluation",
+      "description": "Inverse-net A-stack/height evaluation or missing-prediction report.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/inverse_net/t6_hv/config.json",
+        "outputs/inverse_net/t6_hv/evaluation_metrics.json",
+        "outputs/inverse_net/t6_hv/inverse_net_evaluation_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/inverse_net/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/inverse_net/t6_hv/evaluation_metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "ablation",
+      "description": "Forward and A-stack ablation summary.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/ablation/t6_hv/config.json",
+        "outputs/ablation/t6_hv/metrics.json",
+        "outputs/ablation/t6_hv/ablation_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/ablation/t6_hv/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/ablation/t6_hv/metrics.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": true,
+      "seed_recorded": true
+    },
+    {
+      "id": "final_questions",
+      "description": "Evidence-linked answers to final required research questions.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/final_questions/config.json",
+        "outputs/final_questions/answers.json",
+        "outputs/final_questions/final_question_answers.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/final_questions/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/final_questions/answers.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "requirement_traceability",
+      "description": "Original task requirement-to-evidence traceability matrix.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/traceability/config.json",
+        "outputs/traceability/requirements_traceability.json",
+        "outputs/traceability/requirements_traceability.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/traceability/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/traceability/requirements_traceability.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    },
+    {
+      "id": "coverage_audit",
+      "description": "Requirement-level reproducibility audit.",
+      "status": "satisfied",
+      "required_paths": [
+        "outputs/audit/config.json",
+        "outputs/audit/coverage.json",
+        "outputs/audit/coverage_report.md"
+      ],
+      "missing": [],
+      "json_checks": {
+        "config": {
+          "path": "outputs/audit/config.json",
+          "ok": true,
+          "error": null
+        },
+        "metrics": {
+          "path": "outputs/audit/coverage.json",
+          "ok": true,
+          "error": null
+        }
+      },
+      "output_under_outputs": true,
+      "seed_required": false,
+      "seed_recorded": true
+    }
+  ],
+  "exclusion_policy": {
+    "id": "excluded_incomplete_sample",
+    "status": "satisfied",
+    "manifest_error": null,
+    "complete_metrics_error": null,
+    "manifest_excluded_samples": [
+      "台阶曝光1"
+    ],
+    "complete_nonexcluded_samples": [
+      "台阶曝光2",
+      "回型曝光20000",
+      "小孔",
+      "细台阶"
+    ],
+    "compared_samples": [
+      "台阶曝光2",
+      "回型曝光20000",
+      "小孔",
+      "细台阶"
+    ],
+    "compared_excluded_samples": [
+      "台阶曝光1"
+    ]
+  },
+  "seeded_random_processes": {
+    "id": "seeded_random_processes",
+    "status": "satisfied",
+    "rows": [
+      {
+        "path": "scripts/optimize_modulation_latents.py",
+        "exists": true,
+        "required_snippets": [
+          "--seed",
+          "np.random.seed(args.seed)"
+        ],
+        "snippets_present": true
+      },
+      {
+        "path": "scripts/optimize_platform_constrained_latents.py",
+        "exists": true,
+        "required_snippets": [
+          "--seed",
+          "np.random.seed(args.seed)"
+        ],
+        "snippets_present": true
+      },
+      {
+        "path": "scripts/optimize_affine_warp_latents.py",
+        "exists": true,
+        "required_snippets": [
+          "--seed",
+          "np.random.seed(args.seed)"
+        ],
+        "snippets_present": true
+      },
+      {
+        "path": "scripts/summarize_ablation.py",
+        "exists": true,
+        "required_snippets": [
+          "--seed",
+          "np.random.seed(args.seed)"
+        ],
+        "snippets_present": true
+      },
+      {
+        "path": "scripts/simulate_os_sim_realistic.py",
+        "exists": true,
+        "required_snippets": [
+          "--seed",
+          "np.random.default_rng(args.seed)"
+        ],
+        "snippets_present": true
+      },
+      {
+        "path": "scripts/train_inverse_lightsection_net.py",
+        "exists": true,
+        "required_snippets": [
+          "--seed",
+          "torch.manual_seed(args.seed)",
+          "np.random.seed(args.seed)"
+        ],
+        "snippets_present": true
+      }
+    ]
+  }
+}

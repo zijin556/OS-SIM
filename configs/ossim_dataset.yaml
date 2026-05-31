@@ -1,0 +1,166 @@
+dataset:
+  name: ossim_reflective_3d_morphology_3_6_scan
+  task: industrial_reflective_sample_3d_morphology_recovery
+  raw_root: 'E:/research/AIResearch/程序/01_raw_data/dlp6500_sim_confocal/scans_raw/3-6扫描'
+  raw_data_policy: read_only
+  file_format:
+    extension: .bmp
+    width_px: 2448
+    height_px: 2048
+    bit_depth: 8
+    channels: 1
+    observed_file_size_bytes: 5014582
+  hierarchy:
+    pattern: '<raw_root>/<sample>/Z_<z_position>/<frame_id>.bmp'
+    z_folder_regex: '^Z_(?P<z>[0-9]+\\.[0-9]+)$'
+    frame_filename_regex: '^(?P<frame_id>[0-9]+)\\.bmp$'
+    sort:
+      samples: lexical
+      z_layers: numeric_z
+      frames: numeric_frame_id
+
+calibration_assets:
+  dlp6500_root: 'E:/research/AIResearch/程序/01_raw_data/dlp6500_sim_confocal'
+  calibration_root: 'E:/research/AIResearch/程序/01_raw_data/dlp6500_sim_confocal/calibration'
+  projection_patterns_root: 'E:/research/AIResearch/程序/01_raw_data/dlp6500_sim_confocal/projection_patterns'
+  default_calibration_label: '3-6'
+  default_calibration_z_folder: 'Z_0.000'
+  preferred_mapping_mat: 'DMD_CCD_Calibration_Dict.mat'
+  default_projection_sequence: 'saomiao3_6'
+  projection_frame_map:
+    ossim_t6_h_3step: [100, 102]
+    ossim_t6_v_3step: [103, 105]
+
+z_axis:
+  observed_step: 0.5
+  unit: micrometer
+  unit_evidence: outputs/z_unit/evidence.json
+  note: Local MATLAB analysis outputs label reconstructed physical height in micrometers and use zScale=1.0 um/unit depth; this is not an independent step-height truth.
+
+frame_groups:
+  - name: dot_array_scan
+    frames: [1, 81]
+    modality: dot_array_scan
+    use_by_default: true
+    note: Point/dot-array scan acquisition data.
+  - name: ossim_t12_h_3step
+    frames: [82, 84]
+    modality: os_sim
+    period: T12
+    direction: horizontal
+    phase_steps: 3
+    use_by_default: true
+  - name: ossim_t12_v_3step
+    frames: [85, 87]
+    modality: os_sim
+    period: T12
+    direction: vertical
+    phase_steps: 3
+    use_by_default: true
+  - name: ossim_t12_h_6step
+    frames: [88, 93]
+    modality: os_sim
+    period: T12
+    direction: horizontal
+    phase_steps: 6
+    use_by_default: true
+  - name: ossim_t12_v_6step
+    frames: [94, 99]
+    modality: os_sim
+    period: T12
+    direction: vertical
+    phase_steps: 6
+    use_by_default: true
+  - name: ossim_t6_h_3step
+    frames: [100, 102]
+    modality: os_sim
+    period: T6
+    direction: horizontal
+    phase_steps: 3
+    use_by_default: true
+  - name: ossim_t6_v_3step
+    frames: [103, 105]
+    modality: os_sim
+    period: T6
+    direction: vertical
+    phase_steps: 3
+    use_by_default: true
+
+samples:
+  - name: 台阶曝光1
+    z_min: 20.0
+    z_max: 40.0
+    z_step: 0.5
+    z_layers: 41
+    bmp_files: 4300
+    expected_frames_per_complete_layer: 105
+    incomplete_layers:
+      - z: 20.0
+        folder: Z_20.000
+        missing_frames: [105]
+      - z: 20.5
+        folder: Z_20.500
+        missing_frames: [105]
+      - z: 35.0
+        folder: Z_35.000
+        missing_frames: [105]
+      - z: 35.5
+        folder: Z_35.500
+        missing_frames: [105]
+      - z: 36.0
+        folder: Z_36.000
+        missing_frames: [105]
+  - name: 台阶曝光2
+    z_min: 20.0
+    z_max: 40.0
+    z_step: 0.5
+    z_layers: 41
+    bmp_files: 4305
+    expected_frames_per_complete_layer: 105
+    incomplete_layers: []
+  - name: 回型曝光20000
+    z_min: 25.0
+    z_max: 40.0
+    z_step: 0.5
+    z_layers: 31
+    bmp_files: 3255
+    expected_frames_per_complete_layer: 105
+    incomplete_layers: []
+  - name: 小孔
+    z_min: 25.0
+    z_max: 40.0
+    z_step: 0.5
+    z_layers: 31
+    bmp_files: 3255
+    expected_frames_per_complete_layer: 105
+    incomplete_layers: []
+  - name: 细台阶
+    z_min: 25.0
+    z_max: 40.0
+    z_step: 0.5
+    z_layers: 31
+    bmp_files: 3255
+    expected_frames_per_complete_layer: 105
+    incomplete_layers: []
+
+loader_policy:
+  missing_required_frame: error_or_skip_layer
+  missing_optional_frame: mark_incomplete
+  normalize: uint8_to_float32_0_1
+  raw_mutation_allowed: false
+  recommended_processed_root: 'E:/research/AIResearch/PhysicsDeepLearning_OSSIM/data/processed'
+
+research_notes:
+  primary_input_candidates:
+    - ossim_t12_h_3step
+    - ossim_t12_v_3step
+    - ossim_t12_h_6step
+    - ossim_t12_v_6step
+    - ossim_t6_h_3step
+    - ossim_t6_v_3step
+  reference_or_label_candidate:
+    - dot_array_scan
+  unresolved_questions:
+    - What is the physical z unit?
+    - Is dot-array scan the intended ground truth, pseudo-label source, or only a baseline?
+    - Are acquisition parameters constant across all samples?

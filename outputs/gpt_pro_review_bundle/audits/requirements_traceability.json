@@ -1,0 +1,340 @@
+{
+  "artifact_type": "requirement_traceability_matrix",
+  "overall": "complete_with_documented_limits",
+  "status_counts": {
+    "satisfied": 27,
+    "documented_limit": 1
+  },
+  "requirements": [
+    {
+      "id": "U0_DATA_ROOT",
+      "phase": "User Constraints",
+      "requirement": "Use the user-specified raw scan directory as read-only input.",
+      "status": "satisfied",
+      "evidence": [
+        "configs/ossim_dataset.yaml",
+        "outputs/data_manifest.json"
+      ],
+      "notes": "raw_root=E:\\research\\AIResearch\\程序\\01_raw_data\\dlp6500_sim_confocal\\scans_raw\\3-6扫描"
+    },
+    {
+      "id": "U1_EXCLUDE_INCOMPLETE_SAMPLE",
+      "phase": "User Constraints",
+      "requirement": "Exclude incomplete `台阶曝光1` from experiments and comparisons.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/data_manifest.json",
+        "outputs/complete_samples/t6_hv_measured/metrics.json"
+      ],
+      "notes": "complete_nonexcluded=['台阶曝光2', '回型曝光20000', '小孔', '细台阶']"
+    },
+    {
+      "id": "U2_T6_HV_FRAMES",
+      "phase": "User Constraints",
+      "requirement": "Use T6 H/V 3-step frames: H `100-102`, V `103-105`.",
+      "status": "satisfied",
+      "evidence": [
+        "configs/ossim_dataset.yaml",
+        "outputs/data_manifest.json"
+      ],
+      "notes": "fine_z_layers=31"
+    },
+    {
+      "id": "U3_FIRST_ROUND_SAMPLE",
+      "phase": "User Constraints",
+      "requirement": "Run first-round pipeline on `细台阶`.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/baseline/t6_hv/metrics.json",
+        "outputs/final_report.md"
+      ],
+      "notes": "sample=细台阶"
+    },
+    {
+      "id": "P0_REAL_DATA_INSPECTION",
+      "phase": "Phase 0-1",
+      "requirement": "Inspect real data, infer dimensions, collect frame stats, and render previews.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/inspect_data.py",
+        "outputs/data_report.md",
+        "outputs/data_frame_stats.json",
+        "outputs/data_dimension_inference.json",
+        "outputs/previews/raw_frames.png"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P1_OS_SIM_BASELINE",
+      "phase": "Phase 2",
+      "requirement": "Run traditional OS-SIM demodulation and save H/V/fused A stacks plus height readouts.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/baseline_os_sim.py",
+        "src/os_sim.py",
+        "outputs/baseline/t6_hv/A_fused_stack.npy",
+        "outputs/baseline/t6_hv/metrics.json"
+      ],
+      "notes": "A_fused_shape=[31, 256, 256]"
+    },
+    {
+      "id": "P2_FREQUENCY_ANALYSIS",
+      "phase": "Phase 3",
+      "requirement": "Analyze raw/A-stack FFT peaks, residual grid/Moire energy, and T6/T12 comparison.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/analyze_stripe_residuals.py",
+        "src/fft_analysis.py",
+        "outputs/frequency/t6_hv/metrics.json",
+        "outputs/frequency/group_compare/t6_vs_t12_compare.json"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P3_FORWARD_MODELS",
+      "phase": "Phase 4",
+      "requirement": "Implement and compare Level 0-4 forward models on a real crop with modulation and residual-FFT metrics.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/test_forward_models.py",
+        "src/forward_models.py",
+        "outputs/forward/t6_hv/model_compare.json"
+      ],
+      "notes": "models=['level0_ideal_cos_group_period', 'level1_modulation_cos_fft_q', 'level2_binary_dmd_identity_affine_warp_fft_q', 'level2_cos_identity_affine_warp_fft_q', 'level2_measured_dmd_calibrated_map', 'level3_binary_dmd_identity_polynomial_warp_fft_q', 'level3_binary_dmd_zero_bspline_warp_fft_q', 'level4_harmonic_grid_blur_fft_q', 'level4_harmonic_grid_no_blur_fft_q', 'level4_measured_dmd_calibrated_map_blur']"
+    },
+    {
+      "id": "P3A_DMD_CCD_CALIBRATION",
+      "phase": "Phase 4",
+      "requirement": "Explicitly include measured DMD patterns sampled through DMD-CCD calibration.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/inspect_calibration_assets.py",
+        "src/calibration.py",
+        "outputs/calibration/assets_inventory.json",
+        "outputs/forward/t6_hv/model_compare.json"
+      ],
+      "notes": "measured_patterns_mode=required"
+    },
+    {
+      "id": "P4_LATENT_OPTIMIZATION",
+      "phase": "Phase 5",
+      "requirement": "Optimize A/D0/theta-style latent variables on real crops and save optimized A stacks, residuals, curves, and metrics.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/optimize_modulation_latents.py",
+        "scripts/optimize_platform_constrained_latents.py",
+        "outputs/latent_opt/t6_hv/metrics.json",
+        "outputs/platform_opt/t6_hv_measured/metrics.json"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P5_ABLATION_AND_RECOMMENDATION",
+      "phase": "Phase 5",
+      "requirement": "Compare baseline, forward levels, optimized variants, and reject overfit variants with metrics.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/summarize_ablation.py",
+        "outputs/ablation/t6_hv/metrics.json",
+        "outputs/ablation/t6_hv/ablation_report.md"
+      ],
+      "notes": "a_stack_rows=7; recommended=outputs/platform_opt/t6_hv_measured"
+    },
+    {
+      "id": "P6_HEIGHT_READOUT_FROM_A",
+      "phase": "Phase 6",
+      "requirement": "Recover height only from A_stack using argmax/parabolic/Gaussian/softargmax and platform diagnostics.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/reconstruct_height.py",
+        "src/height.py",
+        "outputs/height/platform_compare.json"
+      ],
+      "notes": "recommended=measured_calibrated_platform_constrained; z_unit=micrometer_inferred_from_local_analysis_scripts"
+    },
+    {
+      "id": "P7_SIMULATION_SANITY_ONLY",
+      "phase": "Phase 7",
+      "requirement": "Use simulation only for sanity checks and ablation, not as main training data or real-data evidence.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/simulate_os_sim_realistic.py",
+        "outputs/sim/sim_metrics.json",
+        "outputs/sim/sim_report.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P8_TINY_NET_OPTIONAL",
+      "phase": "Phase 8",
+      "requirement": "Treat tiny-net as optional and report missing PyTorch gracefully.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/train_tiny_network.py",
+        "src/tiny_net.py",
+        "outputs/tiny_net/metrics.json",
+        "outputs/tiny_net/report.md"
+      ],
+      "notes": "status=initialized_only"
+    },
+    {
+      "id": "P9_FINAL_QUESTIONS",
+      "phase": "Phase 9",
+      "requirement": "Answer all 12 required final research questions with evidence paths.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/compile_final_answers.py",
+        "outputs/final_questions/answers.json",
+        "outputs/final_questions/final_question_answers.md"
+      ],
+      "notes": "answer_ids=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+    },
+    {
+      "id": "RUN_CLI_SURFACE",
+      "phase": "Run Requirements",
+      "requirement": "All scripts support command-line execution and help text.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/audit_cli_surface.py",
+        "outputs/cli_surface/cli_surface.json",
+        "outputs/cli_surface/cli_surface_report.md"
+      ],
+      "notes": "scripts_checked=25"
+    },
+    {
+      "id": "RUN_OUTPUT_CONTRACTS",
+      "phase": "Run Requirements",
+      "requirement": "Experiment outputs have config/result files, parseable metrics, output path scope, and random seed visibility.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/audit_experiment_contracts.py",
+        "outputs/reproducibility/contracts.json",
+        "outputs/reproducibility/contract_report.md"
+      ],
+      "notes": "counts={'satisfied': 29}"
+    },
+    {
+      "id": "BOUNDARY_NO_Z_TO_RAW_RENDERER",
+      "phase": "Modeling Boundaries",
+      "requirement": "Do not generate full raw stripe sequences from z(x,y); height is a readout from A_stack.",
+      "status": "satisfied",
+      "evidence": [
+        "src/height.py",
+        "scripts/reconstruct_height.py",
+        "outputs/height/platform_compare.json"
+      ],
+      "notes": "Height scripts load A_stack and compute peak readouts; no z-to-raw rendering stage is part of the pipeline."
+    },
+    {
+      "id": "BOUNDARY_CONSTRAINED_M_THETA",
+      "phase": "Modeling Boundaries",
+      "requirement": "Keep M_theta constrained to known patterns, low-dimensional warps, harmonics, grid bases, and optional blur.",
+      "status": "satisfied",
+      "evidence": [
+        "src/forward_models.py",
+        "outputs/forward/t6_hv/model_compare.json"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "BOUNDARY_A_CLS_WEAK_BASELINE",
+      "phase": "Modeling Boundaries",
+      "requirement": "Treat classical A_cls as baseline/weak constraint, not clean ground truth.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/ablation/t6_hv/metrics.json",
+        "outputs/final_report.md"
+      ],
+      "notes": "Aggressive A-only variants are rejected by platform stability gates rather than accepted from lower grid loss alone."
+    },
+    {
+      "id": "N1_INVERSE_NET_ARCHITECTURE",
+      "phase": "Neural Inverse Model",
+      "requirement": "Implement Tiny U-Net/U-LiteNet that maps six T6 H/V phase frames to non-negative A_h/A_v, not directly to height.",
+      "status": "satisfied",
+      "evidence": [
+        "src/inverse_net.py"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "N2_RESTRICTED_TORCH_FORWARD",
+      "phase": "Neural Inverse Model",
+      "requirement": "Implement PyTorch constrained M_theta with fixed/measured patterns and only low-dimensional theta terms.",
+      "status": "satisfied",
+      "evidence": [
+        "src/torch_forward.py"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "N3_INVERSE_NET_TRAINING_ENTRYPOINT",
+      "phase": "Neural Inverse Model",
+      "requirement": "Train with Y_hat = D0 + A_pred * M_theta using L_mod, L_raw, TV, FFT grid, weak A_cls, theta regularization, and platform terms.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/train_inverse_lightsection_net.py",
+        "outputs/inverse_net/t6_hv/config.json",
+        "outputs/inverse_net/t6_hv/metrics.json",
+        "outputs/inverse_net/t6_hv/inverse_net_report.md"
+      ],
+      "notes": "status=completed; missing_torch_is_graceful=False"
+    },
+    {
+      "id": "N4_INVERSE_NET_EVALUATION_ENTRYPOINT",
+      "phase": "Neural Inverse Model",
+      "requirement": "Evaluate predicted A_fused against baseline A_cls and latent optimization with grid energy, platform RMS, height std, and confidence metrics.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/evaluate_inverse_lightsection_net.py",
+        "outputs/inverse_net/t6_hv/evaluation_metrics.json",
+        "outputs/inverse_net/t6_hv/inverse_net_evaluation_report.md"
+      ],
+      "notes": "status=completed; trained_outputs_exist=True"
+    },
+    {
+      "id": "N5_INVERSE_NET_OUTPUT_POLICY",
+      "phase": "Neural Inverse Model",
+      "requirement": "Save required A/height/figure outputs after training; if PyTorch is absent, do not fake outputs and write a missing_torch report instead.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/inverse_net/t6_hv/metrics.json",
+        "outputs/inverse_net/t6_hv/inverse_net_report.md"
+      ],
+      "notes": "trained_outputs_exist=True; graceful_missing_torch=False"
+    },
+    {
+      "id": "LIMIT_HEIGHT_TRUTH",
+      "phase": "External Limits",
+      "requirement": "Independent calibrated height truth is not available, so absolute metrology error is not claimed.",
+      "status": "documented_limit",
+      "evidence": [
+        "outputs/height_truth_assets/assets.json",
+        "outputs/height_truth_assets/height_truth_assets_report.md"
+      ],
+      "notes": "candidates=70; pseudo_references=68; independent_truth_found=False"
+    },
+    {
+      "id": "LIMIT_TORCH",
+      "phase": "External Limits",
+      "requirement": "PyTorch availability for neural inverse-net and optional tiny-net/autograd stages is recorded.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/tiny_net/metrics.json",
+        "outputs/tiny_net/report.md"
+      ],
+      "notes": "status=initialized_only"
+    },
+    {
+      "id": "META_COVERAGE_AUDIT",
+      "phase": "Meta Verification",
+      "requirement": "The repo-level coverage audit is current and machine-readable.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/audit/coverage.json",
+        "outputs/audit/coverage_report.md"
+      ],
+      "notes": "overall=complete_with_documented_limits; counts={'satisfied': 30, 'documented_limit': 1}"
+    }
+  ]
+}

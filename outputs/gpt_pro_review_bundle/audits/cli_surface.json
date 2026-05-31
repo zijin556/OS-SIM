@@ -1,0 +1,430 @@
+{
+  "overall": "satisfied",
+  "status_counts": {
+    "satisfied": 5
+  },
+  "config": {
+    "output": "outputs\\cli_surface",
+    "timeout": 30
+  },
+  "status_rows": [
+    {
+      "id": "cli_help",
+      "status": "satisfied"
+    },
+    {
+      "id": "output_defaults",
+      "status": "satisfied"
+    },
+    {
+      "id": "contract_output_scope",
+      "status": "satisfied"
+    },
+    {
+      "id": "raw_root_policy",
+      "status": "satisfied"
+    },
+    {
+      "id": "dependency_graceful_degradation",
+      "status": "satisfied"
+    }
+  ],
+  "cli_help_rows": [
+    {
+      "script": "scripts/analyze_stripe_residuals.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: analyze_stripe_residuals.py [-h] [--config CONFIG] [--sample SAMPLE]\n                                   [--groups GROUPS]\n                                   [--exclude-samples EXCLUDE_SAMPLES]\n                                   [--crop CROP] [--baseline-dir BASELINE_DIR]\n                                   [--output OUTPUT]\n\nAnalyze raw/A-stack FFT residual stripe and grid energy.\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG\n  --sample SAMPLE\n  --grou",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/audit_cli_surface.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: audit_cli_surface.py [-h] [--output OUTPUT] [--timeout TIMEOUT]\n\nAudit command-line and safety surface for OS-SIM scripts.\n\noptions:\n  -h, --help         show this help message and exit\n  --output OUTPUT\n  --timeout TIMEOUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/audit_experiment_contracts.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: audit_experiment_contracts.py [-h] [--output OUTPUT]\n\nAudit OS-SIM experiment output contracts.\n\noptions:\n  -h, --help       show this help message and exit\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/audit_reproducibility.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: audit_reproducibility.py [-h] [--output OUTPUT]\n\nAudit OS-SIM research artifacts against the explicit staged requirements.\n\noptions:\n  -h, --help       show this help message and exit\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/baseline_os_sim.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: baseline_os_sim.py [-h] [--config CONFIG] [--sample SAMPLE]\n                          [--groups GROUPS]\n                          [--exclude-samples EXCLUDE_SAMPLES] [--crop CROP]\n                          [--output OUTPUT]\n\nRun traditional OS-SIM H/V baseline.\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG\n  --sample SAMPLE\n  --groups GROUPS\n  --exclude-samples EXCLUDE_SAMPLES\n  --crop CROP\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/compare_complete_samples.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: compare_complete_samples.py [-h] [--config CONFIG] [--samples SAMPLES]\n                                   [--groups GROUPS]\n                                   [--exclude-samples EXCLUDE_SAMPLES]\n                                   [--crop CROP]\n                                   [--projection-sequence PROJECTION_SEQUENCE]\n                                   [--calibration-label CALIBRATION_LABEL]\n                                   [--calibration-mat CALIBRATION_MAT]\n                        ",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/compare_os_sim_groups.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: compare_os_sim_groups.py [-h] [--config CONFIG] [--sample SAMPLE]\n                                [--exclude-samples EXCLUDE_SAMPLES]\n                                [--crop CROP] [--output OUTPUT]\n\nCompare T6/T12 and 3-step/6-step OS-SIM groups on a real crop.\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG\n  --sample SAMPLE\n  --exclude-samples EXCLUDE_SAMPLES\n  --crop CROP\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/compile_final_answers.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: compile_final_answers.py [-h] [--output OUTPUT]\n\nCompile explicit answers to the final OS-SIM research questions.\n\noptions:\n  -h, --help       show this help message and exit\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/compile_requirement_traceability.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: compile_requirement_traceability.py [-h] [--output OUTPUT]\n\nCompile a requirement-to-evidence traceability matrix for the OS-SIM task.\n\noptions:\n  -h, --help       show this help message and exit\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/evaluate_inverse_lightsection_net.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: evaluate_inverse_lightsection_net.py [-h] [--input INPUT] [--a-h A_H]\n                                            [--a-v A_V] [--z-values Z_VALUES]\n                                            [--baseline BASELINE]\n                                            [--latent LATENT]\n                                            [--platform-low-mask PLATFORM_LOW_MASK]\n                                            [--platform-high-mask PLATFORM_HIGH_MASK]\n                                            [--",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/inspect_calibration_assets.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: inspect_calibration_assets.py [-h] [--config CONFIG] [--groups GROUPS]\n                                     [--crop CROP]\n                                     [--projection-sequence PROJECTION_SEQUENCE]\n                                     [--calibration-label CALIBRATION_LABEL]\n                                     [--calibration-mat CALIBRATION_MAT]\n                                     [--output OUTPUT]\n\nInspect DMD calibration maps and measured projection bitmaps.\n\noptions:\n  -h, --help",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/inspect_data.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: inspect_data.py [-h] [--config CONFIG] [--sample SAMPLE]\n                       [--groups GROUPS] [--exclude-samples EXCLUDE_SAMPLES]\n                       [--crop CROP] [--output OUTPUT]\n\nInspect OS-SIM raw data and write a manifest/report.\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG\n  --sample SAMPLE\n  --groups GROUPS\n  --exclude-samples EXCLUDE_SAMPLES\n  --crop CROP\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/inspect_height_truth_assets.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: inspect_height_truth_assets.py [-h] [--config CONFIG] [--output OUTPUT]\n                                      [--max-inspect MAX_INSPECT]\n                                      [--max-rows MAX_ROWS]\n\nSearch local project data for independent height-truth or pseudo-reference\nassets.\n\noptions:\n  -h, --help            show this help message and exit\n  --config CONFIG\n  --output OUTPUT\n  --max-inspect MAX_INSPECT\n  --max-rows MAX_ROWS\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/inspect_z_unit_evidence.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: inspect_z_unit_evidence.py [-h] [--config CONFIG] [--output OUTPUT]\n\nInspect local evidence for z coordinate unit and height convention.\n\noptions:\n  -h, --help       show this help message and exit\n  --config CONFIG\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/optimize_affine_warp_latents.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: optimize_affine_warp_latents.py [-h] [--config CONFIG]\n                                       [--sample SAMPLE] [--groups GROUPS]\n                                       [--exclude-samples EXCLUDE_SAMPLES]\n                                       [--crop CROP] [--passes PASSES]\n                                       [--q-source {fft,group}]\n                                       [--pattern-kind {binary,cos}]\n                                       [--duty DUTY]\n                               ",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/optimize_modulation_latents.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: optimize_modulation_latents.py [-h] [--config CONFIG] [--sample SAMPLE]\n                                      [--groups GROUPS]\n                                      [--exclude-samples EXCLUDE_SAMPLES]\n                                      [--crop CROP] [--backend {scipy}]\n                                      [--iterations ITERATIONS] [--lr LR]\n                                      [--lambda-sec LAMBDA_SEC]\n                                      [--lambda-smooth LAMBDA_SMOOTH]\n           ",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/optimize_platform_constrained_latents.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: optimize_platform_constrained_latents.py [-h] [--config CONFIG]\n                                                [--sample SAMPLE]\n                                                [--groups GROUPS]\n                                                [--exclude-samples EXCLUDE_SAMPLES]\n                                                [--crop CROP]\n                                                [--platform-low-mask PLATFORM_LOW_MASK]\n                                                [--platform-hig",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/optimize_theta_latents.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: optimize_theta_latents.py [-h] [--config CONFIG] [--sample SAMPLE]\n                                 [--groups GROUPS]\n                                 [--exclude-samples EXCLUDE_SAMPLES]\n                                 [--crop CROP] [--passes PASSES]\n                                 [--lambda-q LAMBDA_Q]\n                                 [--lambda-phi LAMBDA_PHI]\n                                 [--lambda-harm LAMBDA_HARM]\n                                 [--lambda-sec LAMBDA_SEC] [--outp",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/reconstruct_height.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: reconstruct_height.py [-h] [--sample SAMPLE] [--input INPUT]\n                             [--z-values Z_VALUES] [--output OUTPUT]\n                             [--auto-platform | --no-auto-platform]\n                             [--platform-erode-px PLATFORM_ERODE_PX]\n                             [--platform-low-mask PLATFORM_LOW_MASK]\n                             [--platform-high-mask PLATFORM_HIGH_MASK]\n\nReconstruct height maps from an A_stack.\n\noptions:\n  -h, --help            show this ",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/simulate_os_sim_realistic.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: simulate_os_sim_realistic.py [-h] [--shape SHAPE] [--z-count Z_COUNT]\n                                    [--z-min Z_MIN] [--z-max Z_MAX]\n                                    [--seed SEED] [--output OUTPUT]\n\nSimulate ideal and realistic OS-SIM data for sanity checks.\n\noptions:\n  -h, --help         show this help message and exit\n  --shape SHAPE\n  --z-count Z_COUNT\n  --z-min Z_MIN\n  --z-max Z_MAX\n  --seed SEED\n  --output OUTPUT\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/summarize_ablation.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: summarize_ablation.py [-h] [--forward FORWARD] [--baseline BASELINE]\n                             [--latent LATENT]\n                             [--latent-measured LATENT_MEASURED]\n                             [--theta THETA] [--affine AFFINE]\n                             [--platform PLATFORM]\n                             [--platform-measured PLATFORM_MEASURED]\n                             [--platform-compare PLATFORM_COMPARE]\n                             [--output OUTPUT] [--seed SEED]\n\n",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/sweep_latent_hyperparams.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: sweep_latent_hyperparams.py [-h] [--config CONFIG] [--sample SAMPLE]\n                                   [--groups GROUPS]\n                                   [--exclude-samples EXCLUDE_SAMPLES]\n                                   [--crop CROP]\n                                   [--platform-low-mask PLATFORM_LOW_MASK]\n                                   [--platform-high-mask PLATFORM_HIGH_MASK]\n                                   [--max-platform-rms-multiplier MAX_PLATFORM_RMS_MULTIPLIER]\n    ",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/test_forward_models.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: test_forward_models.py [-h] [--config CONFIG] [--sample SAMPLE]\n                              [--groups GROUPS]\n                              [--exclude-samples EXCLUDE_SAMPLES]\n                              [--crop CROP] [--output OUTPUT]\n                              [--measured-patterns {auto,off,required}]\n                              [--projection-sequence PROJECTION_SEQUENCE]\n                              [--calibration-label CALIBRATION_LABEL]\n                              [--cali",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/train_inverse_lightsection_net.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: train_inverse_lightsection_net.py [-h] [--config CONFIG]\n                                         [--sample SAMPLE] [--groups GROUPS]\n                                         [--exclude-samples EXCLUDE_SAMPLES]\n                                         [--crop CROP] [--output OUTPUT]\n                                         [--pattern-source {measured_calibrated,cos_fixed}]\n                                         [--projection-sequence PROJECTION_SEQUENCE]\n                                ",
+      "stderr_head": ""
+    },
+    {
+      "script": "scripts/train_tiny_network.py",
+      "returncode": 0,
+      "help_ok": true,
+      "stdout_head": "usage: train_tiny_network.py [-h] [--sample SAMPLE] [--groups GROUPS]\n                             [--crop CROP] [--output OUTPUT]\n\nOptional tiny-net stage. Requires PyTorch.\n\noptions:\n  -h, --help       show this help message and exit\n  --sample SAMPLE\n  --groups GROUPS\n  --crop CROP\n  --output OUTPUT\n",
+      "stderr_head": ""
+    }
+  ],
+  "output_default_rows": [
+    {
+      "script": "scripts/analyze_stripe_residuals.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/frequency/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/audit_cli_surface.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/cli_surface"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/audit_experiment_contracts.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/reproducibility"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/audit_reproducibility.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/audit"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/baseline_os_sim.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/baseline/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/compare_complete_samples.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/complete_samples/t6_hv_measured"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/compare_os_sim_groups.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/frequency/group_compare"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/compile_final_answers.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/final_questions"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/compile_requirement_traceability.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/traceability"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/evaluate_inverse_lightsection_net.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/inverse_net/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/inspect_calibration_assets.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/calibration"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/inspect_data.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/inspect_height_truth_assets.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/height_truth_assets"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/inspect_z_unit_evidence.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/z_unit"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/optimize_affine_warp_latents.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/affine_warp_opt/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/optimize_modulation_latents.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/latent_opt/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/optimize_platform_constrained_latents.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/platform_opt/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/optimize_theta_latents.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/theta_opt/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/reconstruct_height.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/height/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/simulate_os_sim_realistic.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/sim"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/summarize_ablation.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/ablation/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/sweep_latent_hyperparams.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/latent_sweep/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/test_forward_models.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/forward/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/train_inverse_lightsection_net.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/inverse_net/t6_hv"
+      ],
+      "defaults_under_outputs": true
+    },
+    {
+      "script": "scripts/train_tiny_network.py",
+      "has_output_argument": true,
+      "default_outputs": [
+        "outputs/tiny_net"
+      ],
+      "defaults_under_outputs": true
+    }
+  ],
+  "contract_output_scope": {
+    "status": "satisfied",
+    "contract_count": 27,
+    "bad_contracts": []
+  },
+  "raw_root_policy": {
+    "status": "satisfied",
+    "raw_root": "E:\\research\\AIResearch\\程序\\01_raw_data\\dlp6500_sim_confocal\\scans_raw\\3-6扫描",
+    "raw_root_exists": true,
+    "raw_root_under_repo": false,
+    "raw_root_under_outputs": false,
+    "policy": "raw data is read-only input; generated artifacts are written under the repository outputs directory"
+  },
+  "dependency_graceful_degradation": {
+    "status": "satisfied",
+    "tiny_net_status": "initialized_only",
+    "report_exists": true,
+    "metrics_path": "outputs/tiny_net/metrics.json"
+  }
+}

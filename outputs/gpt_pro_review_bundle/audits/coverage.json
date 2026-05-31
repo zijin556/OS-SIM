@@ -1,0 +1,465 @@
+{
+  "status_counts": {
+    "satisfied": 30,
+    "documented_limit": 1
+  },
+  "overall": "complete_with_documented_limits",
+  "requirements": [
+    {
+      "id": "FILES",
+      "requirement": "Required project files and scripts exist.",
+      "status": "satisfied",
+      "evidence": [
+        "README.md",
+        "requirements.txt",
+        "scripts/inspect_data.py",
+        "scripts/inspect_calibration_assets.py",
+        "scripts/inspect_z_unit_evidence.py",
+        "scripts/inspect_height_truth_assets.py",
+        "scripts/audit_cli_surface.py",
+        "scripts/compile_requirement_traceability.py",
+        "scripts/compile_final_answers.py",
+        "scripts/audit_experiment_contracts.py",
+        "scripts/compare_complete_samples.py",
+        "scripts/baseline_os_sim.py",
+        "scripts/analyze_stripe_residuals.py",
+        "scripts/test_forward_models.py",
+        "scripts/optimize_modulation_latents.py",
+        "scripts/reconstruct_height.py",
+        "scripts/simulate_os_sim_realistic.py",
+        "scripts/train_tiny_network.py",
+        "scripts/train_inverse_lightsection_net.py",
+        "scripts/evaluate_inverse_lightsection_net.py",
+        "src/data_io.py",
+        "src/calibration.py",
+        "src/os_sim.py",
+        "src/fft_analysis.py",
+        "src/forward_models.py",
+        "src/torch_forward.py",
+        "src/losses.py",
+        "src/height.py",
+        "src/visualization.py",
+        "src/tiny_net.py",
+        "src/inverse_net.py",
+        "outputs/nightly_report.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P0_ARTIFACTS",
+      "requirement": "Data inspection artifacts, previews, and frame statistics exist.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/data_manifest.json",
+        "outputs/data_report.md",
+        "outputs/data_frame_stats.json",
+        "outputs/data_format_inventory.json",
+        "outputs/data_dimension_inference.json",
+        "outputs/previews/raw_frames.png",
+        "outputs/previews/phase_frames_montage.png",
+        "outputs/previews/z_scan_montage.png",
+        "outputs/previews/mean_variance.png"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P0_EXCLUSION",
+      "requirement": "`台阶曝光1` is excluded and complete experiment samples are identifiable.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/data_manifest.json"
+      ],
+      "notes": "complete_nonexcluded=['台阶曝光2', '回型曝光20000', '小孔', '细台阶']"
+    },
+    {
+      "id": "P0_T6_FRAMES",
+      "requirement": "`细台阶` has complete T6 H/V frames `100-105` for every z layer.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/data_manifest.json"
+      ],
+      "notes": "bad_layers=[], z_layers=31"
+    },
+    {
+      "id": "P0_FORMAT_SCOPE",
+      "requirement": "Inspector inventories supported tif/tiff/png/bmp/npy/npz/mat/h5/hdf5 formats and records example reader metadata.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/inspect_data.py",
+        "outputs/data_format_inventory.json"
+      ],
+      "notes": "counts_by_extension={'.bmp': 18370, '.h5': 0, '.hdf5': 0, '.mat': 0, '.npy': 0, '.npz': 0, '.png': 0, '.tif': 0, '.tiff': 0}; current dataset contains BMP files."
+    },
+    {
+      "id": "P0_DIMENSIONS",
+      "requirement": "Inspector writes candidate K/M/H/W interpretations for the selected real OS-SIM stack.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/data_dimension_inference.json"
+      ],
+      "notes": "candidate_count=3"
+    },
+    {
+      "id": "P0_STATS_SCOPE",
+      "requirement": "Per-frame statistics are generated for the inspected first-round T6 H/V sample/groups.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/data_frame_stats.json"
+      ],
+      "notes": "rows=186; this is not a full all-sample/all-frame statistics pass."
+    },
+    {
+      "id": "P1_BASELINE",
+      "requirement": "Traditional OS-SIM baseline generates D0/Dc/Ds/A, H/V/fused stacks, height maps, confidence, figures, config, and metrics.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/baseline/t6_hv/config.json",
+        "outputs/baseline/t6_hv/metrics.json",
+        "outputs/baseline/t6_hv/D0_t6_h_stack.npy",
+        "outputs/baseline/t6_hv/Dc_t6_h_stack.npy",
+        "outputs/baseline/t6_hv/Ds_t6_h_stack.npy",
+        "outputs/baseline/t6_hv/A_t6_h_stack.npy",
+        "outputs/baseline/t6_hv/D0_t6_v_stack.npy",
+        "outputs/baseline/t6_hv/Dc_t6_v_stack.npy",
+        "outputs/baseline/t6_hv/Ds_t6_v_stack.npy",
+        "outputs/baseline/t6_hv/A_t6_v_stack.npy",
+        "outputs/baseline/t6_hv/A_fused_stack.npy",
+        "outputs/baseline/t6_hv/height_fused_argmax.npy",
+        "outputs/baseline/t6_hv/height_fused_peakfit.npy",
+        "outputs/baseline/t6_hv/height_fused_gaussian.npy",
+        "outputs/baseline/t6_hv/height_fused_softargmax.npy",
+        "outputs/baseline/t6_hv/confidence_fused_sharpness.npy",
+        "outputs/baseline/t6_hv/section_montage.png",
+        "outputs/baseline/t6_hv/height_map.png",
+        "outputs/baseline/t6_hv/axis_profiles.png"
+      ],
+      "notes": "A_fused_shape=[31, 256, 256]; fused_height_std=2.936347723007202"
+    },
+    {
+      "id": "P2_FREQUENCY",
+      "requirement": "Raw/A-stack FFT residual analysis and T6/T12 comparison are present.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/frequency/t6_hv/config.json",
+        "outputs/frequency/t6_hv/metrics.json",
+        "outputs/frequency/t6_hv/frequency_report.md",
+        "outputs/frequency/t6_hv/raw_fft_examples.png",
+        "outputs/frequency/t6_hv/section_fft_examples.png",
+        "outputs/frequency/t6_hv/grid_energy_over_z.png",
+        "outputs/frequency/t6_hv/stripe_peak_over_z.png",
+        "outputs/frequency/group_compare/t6_vs_t12_compare.json",
+        "outputs/frequency/group_compare/frequency_compare_report.md"
+      ],
+      "notes": "best_pair=t6_3step"
+    },
+    {
+      "id": "P3_FORWARD",
+      "requirement": "Forward model levels 0-4 run on real crop with RMSE, Charbonnier, residual FFT/grid/stripe metrics.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/forward/t6_hv/config.json",
+        "outputs/forward/t6_hv/model_compare.json",
+        "outputs/forward/t6_hv/forward_report.md",
+        "outputs/forward/t6_hv/reprojection_examples.png",
+        "outputs/forward/t6_hv/residual_examples.png"
+      ],
+      "notes": "Level 2 includes generated pattern controls; measured calibrated DMD patterns are audited separately in P3B."
+    },
+    {
+      "id": "P3A_CALIBRATION_ASSETS",
+      "requirement": "3-6 calibration maps and measured projection bitmaps are inventoried, matched to frames 100-105, and sampled into the camera crop.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/inspect_calibration_assets.py",
+        "src/calibration.py",
+        "outputs/calibration/assets_inventory.json",
+        "outputs/calibration/calibration_report.md",
+        "outputs/calibration/mapping_preview.png",
+        "outputs/calibration/t6_dmd_patterns.png",
+        "outputs/calibration/t6_mapped_camera_patterns.png",
+        "outputs/calibration/ossim_t6_h_3step_mapped_patterns.npy",
+        "outputs/calibration/ossim_t6_v_3step_mapped_patterns.npy"
+      ],
+      "notes": "mapping=E:\\research\\AIResearch\\程序\\01_raw_data\\dlp6500_sim_confocal\\calibration\\3-6标定\\Z_0.000\\DMD_CCD_Calibration_Dict.mat; coordinate_frame=roi_local; matched_t6=True; mapped_groups=['ossim_t6_h_3step', 'ossim_t6_v_3step']"
+    },
+    {
+      "id": "P3B_MEASURED_DMD_FORWARD",
+      "requirement": "Forward comparison includes measured DMD bitmap patterns sampled through the DMD-CCD calibration map.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/forward/t6_hv/model_compare.json",
+        "outputs/forward/t6_hv/forward_report.md"
+      ],
+      "notes": "measured_patterns_mode=required"
+    },
+    {
+      "id": "P11_COMPLETE_SAMPLES",
+      "requirement": "All complete non-excluded samples are compared under T6 H/V measured-calibrated patterns, while the incomplete sample remains excluded.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/compare_complete_samples.py",
+        "outputs/complete_samples/t6_hv_measured/config.json",
+        "outputs/complete_samples/t6_hv_measured/metrics.json",
+        "outputs/complete_samples/t6_hv_measured/complete_samples_report.md",
+        "outputs/complete_samples/t6_hv_measured/sample_metric_summary.png",
+        "outputs/complete_samples/t6_hv_measured/sample_montage.png",
+        "outputs/complete_samples/t6_hv_measured/台阶曝光2/metrics.json",
+        "outputs/complete_samples/t6_hv_measured/回型曝光20000/metrics.json",
+        "outputs/complete_samples/t6_hv_measured/小孔/metrics.json",
+        "outputs/complete_samples/t6_hv_measured/细台阶/metrics.json"
+      ],
+      "notes": "samples=['台阶曝光2', '回型曝光20000', '小孔', '细台阶']; excluded=['台阶曝光1']; row_count=4"
+    },
+    {
+      "id": "P4_P5_LATENT",
+      "requirement": "Crop latent optimization outputs generated-pattern and measured-calibrated optimized A stacks, height comparison, residual figures, config, metrics, and platform-constrained recommendations.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/latent_opt/t6_hv/config.json",
+        "outputs/latent_opt/t6_hv/metrics.json",
+        "outputs/latent_opt/t6_hv/A_fused_stack.npy",
+        "outputs/latent_opt/t6_hv/loss_curve.png",
+        "outputs/latent_opt/t6_hv/A_baseline_vs_optimized.png",
+        "outputs/latent_opt/t6_hv/reprojection_examples.png",
+        "outputs/latent_opt/t6_hv/residual_examples.png",
+        "outputs/latent_opt/t6_hv/residual_fft.png",
+        "outputs/latent_opt/t6_hv/height_baseline_vs_optimized.png",
+        "outputs/affine_warp_opt/t6_hv/config.json",
+        "outputs/affine_warp_opt/t6_hv/metrics.json",
+        "outputs/affine_warp_opt/t6_hv/A_fused_stack.npy",
+        "outputs/affine_warp_opt/t6_hv/affine_warp_loss_curve.png",
+        "outputs/affine_warp_opt/t6_hv/affine_A_height_compare.png",
+        "outputs/platform_opt/t6_hv/config.json",
+        "outputs/platform_opt/t6_hv/metrics.json",
+        "outputs/platform_opt/t6_hv/A_fused_best_stack.npy",
+        "outputs/latent_opt/t6_hv_measured/config.json",
+        "outputs/latent_opt/t6_hv_measured/metrics.json",
+        "outputs/latent_opt/t6_hv_measured/A_fused_stack.npy",
+        "outputs/platform_opt/t6_hv_measured/config.json",
+        "outputs/platform_opt/t6_hv_measured/metrics.json",
+        "outputs/platform_opt/t6_hv_measured/A_fused_best_stack.npy",
+        "outputs/ablation/t6_hv/config.json",
+        "outputs/ablation/t6_hv/metrics.json",
+        "outputs/ablation/t6_hv/ablation_report.md"
+      ],
+      "notes": "aggressive_loss=0.04031768813729286; measured_loss=0.03356897458434105; platform_best_iter=12; measured_platform_best_iter=38"
+    },
+    {
+      "id": "P5_ABLATION",
+      "requirement": "Stage-5 ablation table explicitly compares forward levels B-F and A-stack/height variants.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/ablation/t6_hv/metrics.json",
+        "outputs/ablation/t6_hv/ablation_report.md"
+      ],
+      "notes": "forward_rows=18; a_stack_rows=7; recommended=outputs/platform_opt/t6_hv_measured"
+    },
+    {
+      "id": "P5_THETA_SCOPE",
+      "requirement": "Low-dimensional theta optimization covers q/phase/harmonics and generated-DMD affine warp fitting.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/optimize_theta_latents.py",
+        "scripts/optimize_affine_warp_latents.py",
+        "outputs/theta_opt/t6_hv/metrics.json",
+        "outputs/affine_warp_opt/t6_hv/metrics.json"
+      ],
+      "notes": "Generated-DMD affine warp fitting is implemented; measured DMD/calibration now cover forward comparison, while latent optimization still uses generated-pattern parameterizations."
+    },
+    {
+      "id": "P6_HEIGHT",
+      "requirement": "Height reconstruction outputs argmax/parabolic/Gaussian/softargmax, confidence, profiles, platform metrics, and baseline-vs-generated/measured optimized comparison.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/height/baseline_t6_hv/config.json",
+        "outputs/height/baseline_t6_hv/metrics.json",
+        "outputs/height/baseline_t6_hv/height_maps.png",
+        "outputs/height/baseline_t6_hv/confidence_map.png",
+        "outputs/height/baseline_t6_hv/profiles.png",
+        "outputs/height/baseline_t6_hv/platform_metrics.json",
+        "outputs/height/platform_opt_t6_hv/config.json",
+        "outputs/height/platform_opt_t6_hv/metrics.json",
+        "outputs/height/platform_opt_t6_hv/height_maps.png",
+        "outputs/height/platform_opt_t6_hv/platform_metrics.json",
+        "outputs/height/platform_opt_t6_hv_measured/config.json",
+        "outputs/height/platform_opt_t6_hv_measured/metrics.json",
+        "outputs/height/platform_opt_t6_hv_measured/height_maps.png",
+        "outputs/height/platform_opt_t6_hv_measured/platform_metrics.json",
+        "outputs/height/platform_compare.json"
+      ],
+      "notes": "recommended=measured_calibrated_platform_constrained; z_unit=micrometer_inferred_from_local_analysis_scripts"
+    },
+    {
+      "id": "P12_Z_UNIT_EVIDENCE",
+      "requirement": "Local analysis evidence supports reporting z scan coordinates in micrometers while explicitly not serving as independent height truth.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/inspect_z_unit_evidence.py",
+        "outputs/z_unit/evidence.json",
+        "outputs/z_unit/z_unit_report.md"
+      ],
+      "notes": "inferred_z_unit=micrometer; confidence=local_analysis_convention_high; independent_truth=False"
+    },
+    {
+      "id": "P7_SIM",
+      "requirement": "Simulation sanity check artifacts exist and distinguish ideal vs realistic modes.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/sim/config.json",
+        "outputs/sim/sim_metrics.json",
+        "outputs/sim/sim_report.md",
+        "outputs/sim/ideal_results.png",
+        "outputs/sim/realistic_results.png",
+        "outputs/sim/sim_height_error.png"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P8_TINY_NET",
+      "requirement": "Tiny-net stage is optional and either initializes with PyTorch or gracefully reports missing PyTorch.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/train_tiny_network.py",
+        "src/tiny_net.py",
+        "outputs/tiny_net/metrics.json",
+        "outputs/tiny_net/report.md"
+      ],
+      "notes": "status=initialized_only"
+    },
+    {
+      "id": "P9_REPORTS",
+      "requirement": "Nightly, final report, final question appendix, README, and ablation report are present.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/nightly_report.md",
+        "outputs/final_report.md",
+        "outputs/final_questions/final_question_answers.md",
+        "README.md",
+        "outputs/ablation/t6_hv/ablation_report.md"
+      ],
+      "notes": ""
+    },
+    {
+      "id": "P13_FINAL_QUESTIONS",
+      "requirement": "The final report appendix explicitly answers all 12 required research questions with evidence paths.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/compile_final_answers.py",
+        "outputs/final_questions/config.json",
+        "outputs/final_questions/answers.json",
+        "outputs/final_questions/final_question_answers.md"
+      ],
+      "notes": "answer_ids=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; statuses=['answered', 'answered_negative', 'answered_recommendation', 'answered_with_caveat', 'answered_with_directional_failure']"
+    },
+    {
+      "id": "P14_EXPERIMENT_CONTRACTS",
+      "requirement": "Experiment output contracts are audited for config/result files, parseable JSON metrics, output path scope, exclusion policy, and random seed visibility.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/audit_experiment_contracts.py",
+        "outputs/reproducibility/config.json",
+        "outputs/reproducibility/contracts.json",
+        "outputs/reproducibility/contract_report.md"
+      ],
+      "notes": "overall=satisfied; counts={'satisfied': 29}"
+    },
+    {
+      "id": "P15_HEIGHT_TRUTH_ASSET_SEARCH",
+      "requirement": "Local height-like morphology and point-cloud assets are inventoried and explicitly rejected as independent calibrated height truth.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/inspect_height_truth_assets.py",
+        "outputs/height_truth_assets/config.json",
+        "outputs/height_truth_assets/assets.json",
+        "outputs/height_truth_assets/height_truth_assets_report.md"
+      ],
+      "notes": "candidates=70; inspected=70; pseudo_references=68; independent_truth_found=False"
+    },
+    {
+      "id": "P16_CLI_AND_SAFETY_SURFACE",
+      "requirement": "All scripts expose command-line help, default outputs stay under outputs, raw data remains input-only, and missing PyTorch is reported gracefully.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/audit_cli_surface.py",
+        "outputs/cli_surface/config.json",
+        "outputs/cli_surface/cli_surface.json",
+        "outputs/cli_surface/cli_surface_report.md"
+      ],
+      "notes": "overall=satisfied; scripts_checked=25; counts={'satisfied': 5}; tiny_net_status=initialized_only"
+    },
+    {
+      "id": "P17_REQUIREMENT_TRACEABILITY",
+      "requirement": "Original task requirements, modeling boundaries, run requirements, and external limits are mapped to concrete evidence paths.",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/compile_requirement_traceability.py",
+        "outputs/traceability/config.json",
+        "outputs/traceability/requirements_traceability.json",
+        "outputs/traceability/requirements_traceability.md"
+      ],
+      "notes": "overall=complete_with_documented_limits; counts={'satisfied': 27, 'documented_limit': 1}; rows=28"
+    },
+    {
+      "id": "P18_INVERSE_NET",
+      "requirement": "Neural inverse process is implemented: six raw phase frames enter a tiny U-Net, A_h/A_v are predicted, constrained theta forward model reprojects Y_hat, and missing PyTorch is reported without fake outputs.",
+      "status": "satisfied",
+      "evidence": [
+        "src/inverse_net.py",
+        "src/torch_forward.py",
+        "scripts/train_inverse_lightsection_net.py",
+        "scripts/evaluate_inverse_lightsection_net.py",
+        "outputs/inverse_net/t6_hv/config.json",
+        "outputs/inverse_net/t6_hv/metrics.json",
+        "outputs/inverse_net/t6_hv/inverse_net_report.md",
+        "outputs/inverse_net/t6_hv/evaluation_metrics.json",
+        "outputs/inverse_net/t6_hv/inverse_net_evaluation_report.md"
+      ],
+      "notes": "training_status=completed; evaluation_status=completed; completed_outputs=True; graceful_missing=False"
+    },
+    {
+      "id": "LIMIT_DMD_BITMAPS",
+      "requirement": "Measured DMD binary bitmap files are required for calibrated Level-2 claims.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/calibration/assets_inventory.json",
+        "outputs/forward/t6_hv/model_compare.json",
+        "outputs/final_report.md"
+      ],
+      "notes": "Projection sequence `saomiao3_6.txt` maps raw frames 100-105 to measured T6 H/V 3-step DMD bitmaps."
+    },
+    {
+      "id": "LIMIT_CALIBRATION",
+      "requirement": "Real DMD-CCD affine/warp calibration is required before claiming mapped DMD model superiority.",
+      "status": "satisfied",
+      "evidence": [
+        "src/calibration.py",
+        "outputs/calibration/assets_inventory.json",
+        "outputs/forward/t6_hv/model_compare.json"
+      ],
+      "notes": "Using `E:\\research\\AIResearch\\程序\\01_raw_data\\dlp6500_sim_confocal\\calibration\\3-6标定\\Z_0.000\\DMD_CCD_Calibration_Dict.mat` as a dense DMD-CCD map with coordinate_frame=roi_local."
+    },
+    {
+      "id": "LIMIT_HEIGHT_TRUTH",
+      "requirement": "Independent calibrated step-height or height truth is required for absolute metrology error.",
+      "status": "documented_limit",
+      "evidence": [
+        "outputs/z_unit/evidence.json",
+        "outputs/height_truth_assets/assets.json",
+        "outputs/height_truth_assets/height_truth_assets_report.md",
+        "outputs/height/platform_compare.json",
+        "outputs/final_report.md"
+      ],
+      "notes": "Local search found derived morphology/point-cloud pseudo-reference assets, but no independent calibrated step-height truth is available."
+    },
+    {
+      "id": "LIMIT_TORCH",
+      "requirement": "PyTorch is required only for optional tiny-net/autograd training beyond the NumPy/SciPy first pass.",
+      "status": "satisfied",
+      "evidence": [
+        "outputs/tiny_net/metrics.json",
+        "outputs/inverse_net/t6_hv/metrics.json"
+      ],
+      "notes": "tiny_status=initialized_only; inverse_status=completed"
+    }
+  ]
+}

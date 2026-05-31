@@ -1,0 +1,13 @@
+numpy
+scipy
+matplotlib
+tifffile
+imageio
+h5py
+scikit-image
+tqdm
+pyyaml
+
+# Optional, required for neural inverse-net training:
+# torch
+# torchvision

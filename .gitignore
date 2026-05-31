@@ -1,0 +1,57 @@
+# Python / virtual environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local IDE / OS metadata
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+
+# Experiment outputs
+#
+# Keep the GitHub repository small. Commit source, configs, docs, and the
+# curated GPT Pro review bundle. Leave full generated experiment outputs,
+# arrays, model weights, and archives local unless they are intentionally
+# promoted in a later release.
+outputs/*
+!outputs/gpt_pro_review_bundle/
+!outputs/gpt_pro_review_bundle/**
+!outputs/review_for_gpt_pro.md
+!outputs/review_for_gpt_pro_portable.md
+!outputs/theoretical_model_for_gpt_pro.md
+!outputs/theoretical_model_for_gpt_pro_visual.md
+!outputs/theoretical_model_for_gpt_pro_rendered.html
+
+# Large experiment artifacts, even inside any future re-included output paths.
+outputs/**/*.npy
+outputs/**/*.npz
+outputs/**/*.pt
+outputs/**/*.pth
+outputs/**/*.ckpt
+outputs/**/*.onnx
+outputs/**/*.zip
+outputs/**/*.mat
+outputs/**/*.tif
+outputs/**/*.tiff
+outputs/**/*.bmp
+outputs/**/*.mp4
+outputs/**/*.avi
+
+# Raw data should stay outside Git history.
+01_raw_data/
+raw_data/
+data/raw/
+*.raw
+
+# Local logs and temporary files
+*.log
+tmp/
+temp/
