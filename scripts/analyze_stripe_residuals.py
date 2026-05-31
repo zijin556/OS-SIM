@@ -16,7 +16,16 @@ sys.path.insert(0, str(ROOT))
 from src import data_io
 from src.fft_analysis import circular_peak_mask, detect_frequency_peaks, fft_magnitude, masked_fft_energy, stripe_orientation_from_peak
 from src.forward_models import period_from_group
+from src.height import confidence_metrics, height_parabolic
+from src.os_sim import demodulate_phase_stack, fuse_hv
 from src.visualization import save_montage
+
+
+PAIR_DEFS = {
+    "t12_3step": ("ossim_t12_h_3step", "ossim_t12_v_3step"),
+    "t12_6step": ("ossim_t12_h_6step", "ossim_t12_v_6step"),
+    "t6_3step": ("ossim_t6_h_3step", "ossim_t6_v_3step"),
+}
 
 
 def safe_label(group_name: str) -> str:
@@ -58,6 +67,102 @@ def align_to_probe(section: np.ndarray, probe_shape: tuple[int, int], crop: data
         x0 = (arr.shape[1] - probe_shape[1]) // 2
         return arr[y0 : y0 + probe_shape[0], x0 : x0 + probe_shape[1]]
     raise ValueError(f"Cannot align baseline section shape {arr.shape} to raw probe shape {probe_shape}.")
+
+
+def stack_for_group(config: dict, sample: str, group_name: str, crop, excluded: set[str]) -> tuple[np.ndarray, np.ndarray]:
+    known = data_io.frame_groups_by_name(config)
+    layers = data_io.complete_z_layers(config, sample, [group_name], excluded)
+    z_values = np.array([z for z, _ in layers], dtype=np.float32)
+    A = []
+    for _, z_path in layers:
+        frames = data_io.read_frame_group(z_path, known[group_name], crop=crop, normalize=True)
+        A.append(demodulate_phase_stack(frames)["A"])
+    return np.stack(A, axis=0).astype(np.float32), z_values
+
+
+def group_metrics(A: np.ndarray, z_values: np.ndarray) -> dict:
+    height = height_parabolic(A, z_values)
+    conf = confidence_metrics(A)
+    mid = A.shape[0] // 2
+    peaks = detect_frequency_peaks(A[mid], top_n=8, min_radius=4)
+    residual_peaks = peaks[:4]
+    mask = circular_peak_mask(A[mid].shape, residual_peaks, radius=4) if residual_peaks else np.zeros(A[mid].shape, dtype=bool)
+    grid_energy = [masked_fft_energy(A[k], mask) if residual_peaks else 0.0 for k in range(A.shape[0])]
+    return {
+        "shape": list(A.shape),
+        "grid_energy_mean": float(np.mean(grid_energy)),
+        "grid_energy_max": float(np.max(grid_energy)),
+        "peak_sharpness_mean": float(np.mean(conf["sharpness"])),
+        "peak_to_background_mean": float(np.mean(conf["peak_to_background"])),
+        "fwhm_layers_mean": float(np.mean(conf["fwhm_layers"])),
+        "height_std": float(np.std(height)),
+        "height_min": float(np.min(height)),
+        "height_max": float(np.max(height)),
+        "residual_fft_peaks": residual_peaks,
+    }
+
+
+def compare_pairs(config: dict, sample: str, crop, excluded: set[str]) -> dict:
+    group_names = sorted({name for pair in PAIR_DEFS.values() for name in pair})
+    stacks: dict[str, np.ndarray] = {}
+    z_ref: np.ndarray | None = None
+    group_results = {}
+    for group_name in group_names:
+        try:
+            A, z_values = stack_for_group(config, sample, group_name, crop, excluded)
+            stacks[group_name] = A
+            z_ref = z_values if z_ref is None else z_ref
+            group_results[group_name] = group_metrics(A, z_values)
+        except Exception as exc:
+            group_results[group_name] = {"status": "failed", "error": f"{type(exc).__name__}: {exc}"}
+    pair_results = {}
+    for pair_name, (h_name, v_name) in PAIR_DEFS.items():
+        if h_name not in stacks or v_name not in stacks or z_ref is None:
+            pair_results[pair_name] = {"status": "failed", "reason": "missing_stack"}
+            continue
+        A_fused = fuse_hv(stacks[h_name], stacks[v_name])
+        pair_results[pair_name] = {"status": "ok", **group_metrics(A_fused, z_ref)}
+    ok = {name: row for name, row in pair_results.items() if row.get("status") == "ok"}
+    ranking: dict[str, object] = {}
+    if ok:
+        grid_vals = np.array([v["grid_energy_mean"] for v in ok.values()], dtype=np.float32)
+        sharp_vals = np.array([v["peak_sharpness_mean"] for v in ok.values()], dtype=np.float32)
+        fwhm_vals = np.array([v["fwhm_layers_mean"] for v in ok.values()], dtype=np.float32)
+        score = {}
+        for (name, metrics), grid, sharp, fwhm in zip(ok.items(), grid_vals, sharp_vals, fwhm_vals):
+            grid_norm = (grid - grid_vals.min()) / (np.ptp(grid_vals) + 1e-8)
+            sharp_norm = (sharp - sharp_vals.min()) / (np.ptp(sharp_vals) + 1e-8)
+            fwhm_norm = (fwhm - fwhm_vals.min()) / (np.ptp(fwhm_vals) + 1e-8)
+            score[name] = float((1.0 - grid_norm) + sharp_norm + (1.0 - fwhm_norm))
+        ranking = {"score": score, "best_by_grid_sharpness_fwhm_score": max(score, key=score.get)}
+    return {
+        "sample": sample,
+        "crop": crop.label if crop else "full",
+        "group_metrics": group_results,
+        "pair_metrics": pair_results,
+        "ranking": ranking,
+        "interpretation": "Diagnostic only: lower residual grid energy, higher peak sharpness, and narrower FWHM are preferred. No external height truth was used.",
+    }
+
+
+def save_pair_compare(compare: dict, out_dir: Path) -> None:
+    rows = [(name, row) for name, row in compare.get("pair_metrics", {}).items() if row.get("status") == "ok"]
+    if not rows:
+        return
+    names = [name for name, _ in rows]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.8))
+    axes[0].bar(names, [row["grid_energy_mean"] for _, row in rows])
+    axes[0].set_title("Grid/Moire energy")
+    axes[1].bar(names, [row["peak_sharpness_mean"] for _, row in rows])
+    axes[1].set_title("Peak sharpness")
+    axes[2].bar(names, [row["fwhm_layers_mean"] for _, row in rows])
+    axes[2].set_title("FWHM layers")
+    for ax in axes:
+        ax.tick_params(axis="x", labelrotation=25)
+        ax.grid(True, axis="y", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(out_dir / "t6_vs_t12_compare.png", dpi=150)
+    plt.close(fig)
 
 
 def main() -> None:
@@ -151,8 +256,10 @@ def main() -> None:
 
     save_montage(raw_fft_images, out_dir / "raw_fft_examples.png", raw_fft_titles, cols=2, cmap="magma")
     save_montage(section_fft_images, out_dir / "section_fft_examples.png", section_fft_titles, cols=2, cmap="magma")
+    compare = compare_pairs(config, args.sample, crop, excluded)
+    save_pair_compare(compare, out_dir)
     data_io.write_json(out_dir / "metrics.json", metrics)
-    data_io.write_json(out_dir / "t6_vs_t12_compare.json", {"status": "not_run", "reason": "This run was limited to T6 H/V 3-step groups."})
+    data_io.write_json(out_dir / "t6_vs_t12_compare.json", compare)
     data_io.write_json(
         out_dir / "config.json",
         {
@@ -189,7 +296,7 @@ def main() -> None:
         "## Interpretation",
         "",
         "- T6 H/V directions are analyzed independently; direction-dependent residual peaks should be treated as nuisance terms before any network stage.",
-        "- T6-vs-T12 comparison is not claimed in this run because only T6 groups were requested.",
+        f"- T6-vs-T12 diagnostic winner: `{compare.get('ranking', {}).get('best_by_grid_sharpness_fwhm_score', 'n/a')}`.",
     ]
     (out_dir / "frequency_report.md").write_text("\n".join(report_lines), encoding="utf-8")
     data_io.append_report(
@@ -198,7 +305,7 @@ def main() -> None:
         [
             f"- Completed FFT analysis for `{args.sample}` T6 H/V.",
             f"- Saved frequency figures and metrics under `{out_dir}`.",
-            "- T6-vs-T12 comparison is intentionally marked `not_run` for this first pass.",
+            f"- T6-vs-T12 diagnostic winner: `{compare.get('ranking', {}).get('best_by_grid_sharpness_fwhm_score', 'n/a')}`.",
         ],
     )
     print(f"Wrote frequency outputs to {out_dir}")

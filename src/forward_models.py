@@ -235,6 +235,33 @@ def fixed_grid_basis(shape: tuple[int, int], peaks: list[dict[str, float]], max_
     return np.stack(basis, axis=0).astype(np.float32)
 
 
+def phase_dependent_grid_basis(
+    shape: tuple[int, int],
+    peaks: list[dict[str, float]],
+    m_count: int,
+    max_basis: int = 4,
+) -> np.ndarray:
+    """Return grid/Moire basis with explicit phase dependence [M,B,H,W].
+
+    A phase-invariant additive grid term is removed by phase-wise centering in
+    normalize_m. This basis gives every phase frame a shifted nuisance pattern,
+    so fitted coefficients remain identifiable after normalization.
+    """
+    h, w = shape
+    yy, xx = np.indices(shape, dtype=np.float32)
+    phase_steps = phases_for_m(int(m_count))
+    basis = []
+    for peak in peaks[:max_basis]:
+        fx = float(peak["freq_x_cycles_per_px"])
+        fy = float(peak["freq_y_cycles_per_px"])
+        spatial = 2.0 * np.pi * (fx * xx + fy * yy)
+        basis.append(np.stack([np.cos(spatial + phase) for phase in phase_steps], axis=0))
+        basis.append(np.stack([np.sin(spatial + phase) for phase in phase_steps], axis=0))
+    if not basis:
+        return np.zeros((int(m_count), 0, h, w), dtype=np.float32)
+    return np.stack(basis, axis=1).astype(np.float32)
+
+
 class IdealCosForward:
     def __init__(self, group: dict, qxy: tuple[float, float] | None = None):
         self.group = group
@@ -305,12 +332,21 @@ class HarmonicGridForward(IdealCosForward):
         yy, xx = np.indices((h, w), dtype=np.float32)
         phi0 = qx * xx + qy * yy
         frames = []
-        grid = 0.0
+        grid_invariant = 0.0
+        grid_by_phase = None
         if self.grid_basis is not None and self.grid_basis.size:
-            coeff = np.zeros(self.grid_basis.shape[0], dtype=np.float32) if self.grid_coeff is None else self.grid_coeff
-            grid = np.tensordot(coeff[: self.grid_basis.shape[0]], self.grid_basis, axes=(0, 0))
-        for phase in phases:
+            if self.grid_basis.ndim == 4:
+                if self.grid_basis.shape[0] != m:
+                    raise ValueError(f"Phase-dependent grid basis expects first axis M={m}, got {self.grid_basis.shape[0]}")
+                basis_count = self.grid_basis.shape[1]
+                coeff = np.zeros(basis_count, dtype=np.float32) if self.grid_coeff is None else self.grid_coeff
+                grid_by_phase = np.tensordot(coeff[:basis_count], self.grid_basis, axes=(0, 1))
+            else:
+                coeff = np.zeros(self.grid_basis.shape[0], dtype=np.float32) if self.grid_coeff is None else self.grid_coeff
+                grid_invariant = np.tensordot(coeff[: self.grid_basis.shape[0]], self.grid_basis, axes=(0, 0))
+        for m_idx, phase in enumerate(phases):
             phi = phi0 + phase
+            grid = grid_by_phase[m_idx] if grid_by_phase is not None else grid_invariant
             frame = np.cos(phi) + self.a3 * np.cos(3.0 * phi) + self.a5 * np.cos(5.0 * phi) + grid
             frames.append(frame)
         return normalize_m(self.blur.apply(np.stack(frames, axis=0)))

@@ -130,6 +130,22 @@ def grid_energy_mean(A: np.ndarray, masks: np.ndarray) -> float:
     return float(np.mean(values))
 
 
+def fused_grid_energy(A_fused: np.ndarray, reference_mask: np.ndarray) -> float:
+    values = [masked_fft_energy(A_fused[k], reference_mask) for k in range(A_fused.shape[0])]
+    return float(np.mean(values)) if values else 0.0
+
+
+def fused_method_row(name: str, A_fused: np.ndarray, z_values: np.ndarray, reference_mask: np.ndarray) -> dict:
+    height = height_parabolic(A_fused, z_values)
+    conf = confidence_metrics(A_fused)
+    return {
+        "method": name,
+        "grid_energy": fused_grid_energy(A_fused, reference_mask),
+        "A_tv": tv_l1(A_fused),
+        "height": summarize_height(height, conf),
+    }
+
+
 def grid_penalty_gradient(A: np.ndarray, masks: np.ndarray) -> np.ndarray:
     grad = np.zeros_like(A, dtype=np.float32)
     for k in range(A.shape[0]):
@@ -193,6 +209,8 @@ def main() -> None:
     parser.add_argument("--projection-sequence", default="saomiao3_6")
     parser.add_argument("--calibration-label", default="3-6")
     parser.add_argument("--calibration-mat", default="DMD_CCD_Calibration_Dict.mat")
+    parser.add_argument("--ls-fused-stack", default=None, help="Optional A_fused LS projection stack for v1 comparison.")
+    parser.add_argument("--network-fused-stack", default="outputs/inverse_net_sweep/tx_p015_s012_g003_256_selectbest/A_fused_pred_stack.npy")
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output", default="outputs/latent_opt/t6_hv")
     args = parser.parse_args()
@@ -260,6 +278,28 @@ def main() -> None:
 
     final_loss = modulation_loss(Y, A_opt, M)
     final_grid_energy = grid_energy_mean(A_opt, grid_masks)
+    fused_peaks = detect_frequency_peaks(A_base_fused[A_base_fused.shape[0] // 2], top_n=4, min_radius=4)
+    fused_mask = circular_peak_mask(A_base_fused.shape[-2:], fused_peaks, radius=4) if fused_peaks else np.zeros(A_base_fused.shape[-2:], dtype=bool)
+    A_lowpass = ndimage.gaussian_filter(A_base_fused, sigma=(0, 1.0, 1.0), mode="reflect").astype(np.float32)
+    A_median = ndimage.median_filter(A_base_fused, size=(1, 3, 3), mode="reflect").astype(np.float32)
+    A_tv_proxy = ndimage.gaussian_filter(A_base_fused, sigma=(0, 0.6, 0.6), mode="reflect").astype(np.float32)
+    method_compare = [
+        fused_method_row("A_cls", A_base_fused, z_values, fused_mask),
+        fused_method_row("A_cls_lowpass_sigma1", A_lowpass, z_values, fused_mask),
+        fused_method_row("A_cls_median3", A_median, z_values, fused_mask),
+        fused_method_row("A_cls_tv_proxy_smooth", A_tv_proxy, z_values, fused_mask),
+        fused_method_row("latent_no_platform", A_fused, z_values, fused_mask),
+    ]
+    optional_sources = []
+    if args.ls_fused_stack:
+        optional_sources.append(("A_ls_fixed_Mtheta", ROOT / args.ls_fused_stack))
+    if args.network_fused_stack:
+        optional_sources.append(("existing_network", ROOT / args.network_fused_stack))
+    for name, path in optional_sources:
+        if path.exists():
+            arr = np.load(path).astype(np.float32)
+            if arr.shape == A_base_fused.shape:
+                method_compare.append(fused_method_row(name, arr, z_values, fused_mask))
     # Reprojection snapshots.
     mid = Y.shape[0] // 2
     Y_hat = D0[:, :, None, :, :] + A_opt[:, :, None, :, :] * M[None, :, :, :, :]
@@ -299,6 +339,13 @@ def main() -> None:
         cols=3,
         cmap="viridis",
     )
+    save_montage(
+        [A_base_fused[mid], A_lowpass[mid], A_median[mid], A_tv_proxy[mid], A_fused[mid]],
+        out_dir / "simple_filter_comparison.png",
+        ["A_cls", "lowpass", "median3", "tv proxy", "latent no platform"],
+        cols=3,
+        cmap="viridis",
+    )
     save_scalar_image(height_opt, out_dir / "height_optimized_map.png", "Optimized fused height")
 
     metrics = {
@@ -321,8 +368,17 @@ def main() -> None:
         "height_optimized": summarize_height(height_opt, conf_opt),
         "pattern_infos": pattern_infos,
         "grid_peaks": grid_peaks,
+        "fused_grid_peaks": fused_peaks,
+        "v1_method_compare": method_compare,
     }
     data_io.write_json(out_dir / "metrics.json", metrics)
+    data_io.write_json(
+        out_dir / "method_compare.json",
+        {
+            "methods": method_compare,
+            "interpretation": "v1 comparison of no-platform latent optimization against simple filtering and optional LS/network stacks.",
+        },
+    )
     data_io.write_json(
         out_dir / "config.json",
         {
@@ -339,6 +395,8 @@ def main() -> None:
             "lambda_grid": args.lambda_grid,
             "pattern_source": actual_pattern_source,
             "requested_pattern_source": args.pattern_source,
+            "ls_fused_stack": args.ls_fused_stack,
+            "network_fused_stack": args.network_fused_stack,
             "projection_sequence": args.projection_sequence,
             "calibration_label": args.calibration_label,
             "calibration_mat": args.calibration_mat,
@@ -357,6 +415,17 @@ def main() -> None:
         f"- Final modulation loss: `{final_loss:.6g}`",
         f"- Baseline A grid energy: `{baseline_grid_energy:.6g}`",
         f"- Optimized A grid energy: `{final_grid_energy:.6g}`",
+        "",
+        "## v1 Method Comparison",
+        "",
+        "| method | fused grid energy | A TV | height std | invalid fraction |",
+        "|---|---:|---:|---:|---:|",
+    ]
+    for row in method_compare:
+        report.append(
+            f"| {row['method']} | {row['grid_energy']:.6g} | {row['A_tv']:.6g} | {row['height']['height_std']:.6g} | {row['height']['invalid_fraction']:.6g} |"
+        )
+    report += [
         "",
         "## Caveat",
         "",
