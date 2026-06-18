@@ -23,8 +23,8 @@ from src.forward_models import (
     OptionalBlur,
     PolynomialWarp,
     estimate_q_from_frames,
-    fixed_grid_basis,
     model_losses,
+    phase_dependent_grid_basis,
 )
 from src.os_sim import demodulate_phase_stack
 from src.visualization import save_montage
@@ -122,7 +122,7 @@ def main() -> None:
         grid_mask = circular_peak_mask(A.shape[-2:], grid_peaks, radius=4) if grid_peaks else np.zeros(A.shape[-2:], bool)
         stripe_peak = q_info.get("peak")
         stripe_mask = circular_peak_mask(A.shape[-2:], [stripe_peak], radius=4) if stripe_peak else np.zeros(A.shape[-2:], bool)
-        grid_basis = fixed_grid_basis(A.shape[-2:], grid_peaks[:2], max_basis=2)
+        phase_grid_basis = phase_dependent_grid_basis(A.shape[-2:], grid_peaks[:2], m_count=frames.shape[1], max_basis=2)
         models = {
             "level0_ideal_cos_group_period": IdealCosForward(group),
             "level1_modulation_cos_fft_q": ModulationDomainForward(group, qxy=(qx, qy)),
@@ -141,8 +141,8 @@ def main() -> None:
                 qxy=(qx, qy),
                 a3=0.03,
                 a5=0.01,
-                grid_basis=grid_basis,
-                grid_coeff=np.zeros(grid_basis.shape[0], dtype=np.float32),
+                grid_basis=phase_grid_basis,
+                grid_coeff=np.zeros(phase_grid_basis.shape[1], dtype=np.float32),
                 blur=OptionalBlur(0.0),
             ),
             "level4_harmonic_grid_blur_fft_q": HarmonicGridForward(
@@ -150,8 +150,8 @@ def main() -> None:
                 qxy=(qx, qy),
                 a3=0.03,
                 a5=0.01,
-                grid_basis=grid_basis,
-                grid_coeff=np.zeros(grid_basis.shape[0], dtype=np.float32),
+                grid_basis=phase_grid_basis,
+                grid_coeff=np.zeros(phase_grid_basis.shape[1], dtype=np.float32),
                 blur=OptionalBlur(0.35),
             ),
         }

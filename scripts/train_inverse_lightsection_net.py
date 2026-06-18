@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from src import data_io
 from src.calibration import measured_camera_patterns_for_group
 from src.fft_analysis import circular_peak_mask, detect_frequency_peaks
-from src.forward_models import fixed_grid_basis
+from src.forward_models import phase_dependent_grid_basis
 from src.height import confidence_metrics, height_parabolic, height_softargmax, platform_metrics_from_masks, summarize_height
 from src.os_sim import demodulate_multigroup, fuse_hv
 from src.visualization import save_montage, save_scalar_image
@@ -132,15 +132,19 @@ def load_training_bundle(args: argparse.Namespace) -> dict[str, Any]:
     grid_masks, grid_peaks = build_grid_masks(A_cls)
     grid_basis = []
     for peaks in grid_peaks:
-        grid_basis.append(fixed_grid_basis(Y.shape[-2:], peaks, max_basis=args.grid_basis_peaks))
-    max_basis = max((basis.shape[0] for basis in grid_basis), default=0)
+        grid_basis.append(phase_dependent_grid_basis(Y.shape[-2:], peaks, m_count=Y.shape[2], max_basis=args.grid_basis_peaks))
+    max_basis = max((basis.shape[1] for basis in grid_basis), default=0)
     padded_basis = []
     for basis in grid_basis:
-        if basis.shape[0] < max_basis:
-            pad = np.zeros((max_basis - basis.shape[0], *Y.shape[-2:]), dtype=np.float32)
-            basis = np.concatenate([basis, pad], axis=0)
+        if basis.shape[1] < max_basis:
+            pad = np.zeros((basis.shape[0], max_basis - basis.shape[1], *Y.shape[-2:]), dtype=np.float32)
+            basis = np.concatenate([basis, pad], axis=1)
         padded_basis.append(basis)
-    grid_basis_np = np.stack(padded_basis, axis=0).astype(np.float32) if max_basis else np.zeros((Y.shape[1], 0, *Y.shape[-2:]), dtype=np.float32)
+    grid_basis_np = (
+        np.stack(padded_basis, axis=0).astype(np.float32)
+        if max_basis
+        else np.zeros((Y.shape[1], Y.shape[2], 0, *Y.shape[-2:]), dtype=np.float32)
+    )
     return {
         "config": config,
         "groups": groups,

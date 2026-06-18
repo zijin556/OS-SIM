@@ -150,15 +150,25 @@ if TORCH_AVAILABLE:
             self.register_buffer("base_patterns", normalize_phase_patterns(arr))
             if grid_basis is None:
                 grid_basis = arr.new_zeros((arr.shape[0], 0, arr.shape[-2], arr.shape[-1]))
-            if grid_basis.ndim != 4 or grid_basis.shape[0] != arr.shape[0]:
-                raise ValueError("grid_basis must have shape [G,B,H,W]")
+            if grid_basis.ndim == 4:
+                if grid_basis.shape[0] != arr.shape[0]:
+                    raise ValueError("grid_basis must have shape [G,B,H,W] or [G,M,B,H,W]")
+                grid_basis_count = grid_basis.shape[1]
+                self.grid_basis_phase_dependent = False
+            elif grid_basis.ndim == 5:
+                if grid_basis.shape[0] != arr.shape[0] or grid_basis.shape[1] != arr.shape[1]:
+                    raise ValueError("phase-dependent grid_basis must have shape [G,M,B,H,W]")
+                grid_basis_count = grid_basis.shape[2]
+                self.grid_basis_phase_dependent = True
+            else:
+                raise ValueError("grid_basis must have shape [G,B,H,W] or [G,M,B,H,W]")
             self.register_buffer("grid_basis", grid_basis.float())
             g_count, m_count = arr.shape[:2]
             self.delta_q = nn.Parameter(torch.zeros(g_count, 2), requires_grad=learn_delta_q)
             self.phase_offsets = nn.Parameter(torch.zeros(g_count, m_count), requires_grad=learn_phase)
             self.affine_residual = nn.Parameter(torch.zeros(g_count, 2, 3), requires_grad=learn_affine)
             self.blur_sigma_raw = nn.Parameter(torch.full((g_count,), -5.0), requires_grad=learn_blur)
-            self.grid_coeff = nn.Parameter(torch.zeros(g_count, self.grid_basis.shape[1]), requires_grad=learn_grid)
+            self.grid_coeff = nn.Parameter(torch.zeros(g_count, grid_basis_count), requires_grad=learn_grid)
             self.delta_q_scale = float(delta_q_scale)
             self.delta_q_pattern_scale = float(delta_q_pattern_scale)
             self.affine_residual_scale = float(affine_residual_scale)
@@ -172,9 +182,13 @@ if TORCH_AVAILABLE:
                 out = _delta_q_residual(out, self.delta_q, self.delta_q_scale, self.delta_q_pattern_scale)
             if self.affine_residual.requires_grad:
                 out = _apply_affine_residual(out, self.affine_residual, self.affine_residual_scale)
-            if self.grid_basis.shape[1] > 0:
-                grid = torch.einsum("gb,gbhw->ghw", self.grid_coeff * self.grid_coeff_scale, self.grid_basis)
-                out = out + grid[:, None]
+            if self.grid_coeff.numel():
+                if self.grid_basis_phase_dependent:
+                    grid = torch.einsum("gb,gmbhw->gmhw", self.grid_coeff * self.grid_coeff_scale, self.grid_basis)
+                    out = out + grid
+                else:
+                    grid = torch.einsum("gb,gbhw->ghw", self.grid_coeff * self.grid_coeff_scale, self.grid_basis)
+                    out = out + grid[:, None]
             if self.blur_sigma_raw.requires_grad:
                 out = _gaussian_blur_group(out, self.blur_sigma_raw)
             return normalize_phase_patterns(out)
